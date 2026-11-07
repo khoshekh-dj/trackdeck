@@ -25,8 +25,23 @@ PORTS="pkgconfig qt5-qtbase qt5-qtscript qt5-qtsvg qt5-qttools
  gstreamer1-gst-plugins-bad gstreamer1-gst-plugins-ugly gstreamer1-gst-libav
  taglib aubio ImageMagick librsvg"
 
-echo "==> Installing build dependencies with MacPorts (asks for your password)"
-sudo port -N install $PORTS
+# only install what's missing, so later builds (and a GitHub Actions runner,
+# which can't type a password) don't need sudo
+MISSING=""
+for p in $PORTS; do
+    port -q installed "$p" 2>/dev/null | grep -q "(active)" || MISSING="$MISSING $p"
+done
+if [ -n "$MISSING" ]; then
+    if [ -n "${CI:-}" ]; then
+        echo "MacPorts packages missing on this runner:$MISSING"
+        echo "Install them once by hand: sudo port -N install$MISSING"
+        exit 1
+    fi
+    echo "==> Installing build dependencies with MacPorts (asks for your password):$MISSING"
+    sudo port -N install $MISSING
+else
+    echo "==> MacPorts build dependencies already installed"
+fi
 
 export PATH="/opt/local/libexec/qt5/bin:/opt/local/bin:$PATH"
 
