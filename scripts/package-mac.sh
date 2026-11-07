@@ -79,7 +79,11 @@ else
         mkdir -p "$LIC/$portname"
         port info --license --homepage "$portname" > "$LIC/$portname/INFO.txt" 2>/dev/null || true
         for l in "$PREFIX/share/doc/$portname"/{COPYING,LICENSE,LICENCE}*; do
-            [ -f "$l" ] && cp "$l" "$LIC/$portname/"
+            # an unmatched pattern stays literal; with "set -e" a bare
+            # "[ -f ] && cp" would end the script silently, so use if
+            if [ -f "$l" ]; then
+                cp "$l" "$LIC/$portname/"
+            fi
         done
     done
     echo "licences collected for $(ls "$LIC" | wc -l | tr -d ' ') MacPorts packages"
