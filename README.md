@@ -121,8 +121,8 @@ The script copies Qt, an audio-only set of GStreamer plugins and every DLL they 
 To build the installer from that folder, install [Inno Setup 6](https://jrsoftware.org/isinfo.php) and run, from a Windows command prompt:
 
 ```bat
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.3.1 scripts\windows-installer.iss
-:: -> dist\TrackDeck-1.3.1-Windows-x64-Setup.exe
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.3.2 scripts\windows-installer.iss
+:: -> dist\TrackDeck-1.3.2-Windows-x64-Setup.exe
 ```
 
 Release builds make both on GitHub Actions; see `.github/workflows/windows.yml`.

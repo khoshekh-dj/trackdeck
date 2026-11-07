@@ -1,3 +1,6 @@
+* 1.3.2, Sat Nov 7 2026
+- Fix: embedded artwork now shows for AIFF and WAV files (it was never read from them), and for Opus files that store it as a picture block
+
 * 1.3.1, Sat Nov 7 2026
 - New: Retro skin: bevelled grey panels, push-in buttons and a black display with green text, a tribute to the desktop players of the late '90s
 - Fix: .aif and .aifc files show in Add Files and are picked up when adding a folder (settings from older versions get them added)
