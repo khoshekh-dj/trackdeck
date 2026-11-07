@@ -121,7 +121,7 @@
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QSplitter" name="splitter">
+        <widget class="QSplitter" name="tagSplitter">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>

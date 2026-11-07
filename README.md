@@ -18,12 +18,14 @@ A dark design with large cover art, the title, artist and album, a BPM · kbps �
 
 To switch skins, use Preferences → General → Skin, then restart TrackDeck.
 
-![Modern skin](docs/screenshots/modern-skin.png)
+![TrackDeck in the Modern skin: album art as the background, the curve visualiser, the RGB waveform and the playlist columns](docs/screenshots/main-window.jpg)
+
+![TrackDeck in the teal Khoshekh skin with the mirrored visualiser](docs/assets/khoshekh.jpg)
 
 ### RGB waveform
 The waveform is coloured by frequency, with bass in red, mids in green and highs in blue. Choose RGB (balanced), Vivid RGB or your accent colour in Preferences → Track Information. You can also untick *Color waveform by frequency* to turn the colours off.
 
-![RGB waveform](docs/screenshots/rgb-waveform.png)
+![RGB waveform](docs/screenshots/rgb-waveform.jpg)
 
 ### Live spectrum visualiser
 A real-time frequency display, like a graphic EQ, to the right of the track info. The bars are timed to what you hear, not to what has just been decoded. Preferences → Visualiser lets you choose:
@@ -34,13 +36,20 @@ A real-time frequency display, like a graphic EQ, to the right of the track info
 
 It uses about 7% of one CPU core at 30 frames per second on an Apple Silicon Mac. To turn it off, untick *Show the live spectrum visualiser*.
 
+![Visualiser: bars with peak caps](docs/assets/vis-bars.jpg)
+![Visualiser: LED segments](docs/assets/vis-segments.jpg)
+![Visualiser: mirrored bars](docs/assets/vis-mirrored.jpg)
+![Visualiser: smooth curve](docs/assets/vis-curve.jpg)
+
 ### BPM detection
 For tracks without a BPM tag, TrackDeck works out the tempo the first time you play them, using [aubio](https://aubio.org). The result appears in the BPM column and on the track info line with a `*` (for example `126.1*`), so you can tell it from a BPM tag, and it's remembered, so each track is analysed only once. Tracks of 15 minutes or longer are skipped, because they're most likely DJ mixes. To turn it off, untick Preferences → Track Information → *Detect BPM for tracks without a BPM tag*.
 
 ### Playlist columns
 The playlist can show columns from your tags: Artist, Title, Album, Genre, Key, Label, BPM, Year, Track, Bitrate and Duration. In Preferences → Track Information, tick the columns you want and drag them into order. Columns are resizable. To turn them off, untick *Show playlist as columns*.
 
-![Playlist columns](docs/screenshots/playlist-columns.png)
+![Playlist columns with Genre, BPM, Key and Label, sorted by key](docs/assets/keysort.jpg)
+
+<img src="docs/screenshots/preferences.jpg" width="420" alt="Preferences, Track Information tab: columns to show, BPM detection, waveform colours and accent colour">
 
 ### Playlists
 Save the current list as a playlist (**Save Playlist As…**, Shift+Cmd+S), open one (**Open Playlist…**, Cmd+L, or **Open Recent Playlist**), and right-click tracks to **Add to Playlist ▸** an existing playlist or a new one, without leaving the list you're on. Playlists are `.m3u8` files in `~/Music/TrackDeck Playlists` (configurable in Preferences → General), so rekordbox, Serato, Engine DJ and most players can import them. When opening a playlist, TrackDeck asks whether to replace the current list or add to it; Preferences sets a default. **Save Playlist** (Cmd+S) updates the playlist you opened.
@@ -49,6 +58,8 @@ Save the current list as a playlist (**Save Playlist As…**, Shift+Cmd+S), open
 Select one or more tracks, right-click and choose **Tag Editor** (F4). For one track you can edit every tag, including the raw ones. For several tracks, type into a field such as Genre, Label or Album artist and it changes on all of them. Fields marked *(various)* differ between the tracks and stay as they are unless you type a new value. Titles and track numbers are edited one track at a time.
 
 The fields are Title, Artist, Album, Album artist, Remixer, Date, Genre, BPM, Key, Label, Comment, Composer, Copyright, URL and Encoded by. Each format gets its own tag standard: ID3v2 for MP3, AIFF and WAV; Vorbis comments for FLAC, Ogg and Opus; and iTunes atoms for M4A. MP3 tags are written as **ID3v2.3**, the version DJ software, CDJs and Windows read most reliably; Preferences → Track Information can switch to ID3v2.4. Saving only changes the tags you edited. Cover art and the data DJ software keeps in the file are left as they are, including Serato cue points and Traktor analysis. Tracks that are still in iCloud Drive or OneDrive and not downloaded are left out, so the app doesn't freeze while they download.
+
+![The tag editor with 4 tracks selected: shared fields filled in, differing ones marked (various)](docs/screenshots/tag-editor.jpg)
 
 ### Also
 - **Formats:** MP3, AAC/M4A, Apple Lossless (ALAC), FLAC, WAV, AIFF, Ogg Vorbis, Opus, WMA, AC3 and more. WavPack works on Windows.
@@ -110,8 +121,8 @@ The script copies Qt, an audio-only set of GStreamer plugins and every DLL they 
 To build the installer from that folder, install [Inno Setup 6](https://jrsoftware.org/isinfo.php) and run, from a Windows command prompt:
 
 ```bat
-"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.3.0 scripts\windows-installer.iss
-:: -> dist\TrackDeck-1.3.0-Windows-x64-Setup.exe
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.3.1 scripts\windows-installer.iss
+:: -> dist\TrackDeck-1.3.1-Windows-x64-Setup.exe
 ```
 
 Release builds make both on GitHub Actions; see `.github/workflows/windows.yml`.

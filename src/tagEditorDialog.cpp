@@ -49,9 +49,9 @@ NTagEditorDialog::NTagEditorDialog(const QStringList &files, QWidget *parent) : 
 {
     ui.setupUi(this);
     // give the right-hand fields (Album artist, Label...) room as well
-    ui.splitter->setStretchFactor(0, 3);
-    ui.splitter->setStretchFactor(1, 2);
-    ui.splitter->setSizes(QList<int>() << 450 << 300);
+    ui.tagSplitter->setStretchFactor(0, 3);
+    ui.tagSplitter->setStretchFactor(1, 2);
+    ui.tagSplitter->setSizes(QList<int>() << 450 << 300);
 
     m_valid = false;
     m_hasChanges = false;
@@ -88,7 +88,7 @@ NTagEditorDialog::NTagEditorDialog(const QStringList &files, QWidget *parent) : 
         QMessageBox msgBox(QMessageBox::Information, tr("Tag Editor"),
                            editable.isEmpty()
                                ? tr("These tracks can't be edited right now:")
-                               : tr("%n track(s) will be left out:", "", skipped.size()),
+                               : (skipped.size() == 1 ? tr("1 track will be left out:") : tr("%1 tracks will be left out:").arg(skipped.size())),
                            QMessageBox::Ok, parent);
         QStringList shown = skipped.mid(0, 12);
         if (skipped.size() > shown.size()) {
@@ -221,7 +221,7 @@ void NTagEditorDialog::markChanged()
 
 void NTagEditorDialog::setupMultiTrack()
 {
-    setWindowTitle(tr("Tag Editor") + " \u2014 " + tr("%n track(s)", "", m_files.size()));
+    setWindowTitle(tr("Tag Editor") + " \u2014 " + tr("%1 tracks").arg(m_files.size()));
 
     // one General page: no raw tags, encoding or artwork for several tracks
     ui.tabWidget->removeTab(ui.tabWidget->indexOf(ui.rawTagsTab));
@@ -363,7 +363,7 @@ bool NTagEditorDialog::writeMultiTrackTags()
 
     if (!failed.isEmpty()) {
         QMessageBox msgBox(QMessageBox::Warning, tr("Save Fail"),
-                           tr("%n track(s) couldn't be saved:", "", failed.size()),
+                           (failed.size() == 1 ? tr("1 track couldn't be saved:") : tr("%1 tracks couldn't be saved:").arg(failed.size())),
                            QMessageBox::Close, this);
         QStringList shown = failed.mid(0, 12);
         if (failed.size() > shown.size()) {

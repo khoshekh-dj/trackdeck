@@ -1,0 +1,1074 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>mainWindow</class>
+ <widget class="QDialog" name="mainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>760</width>
+    <height>560</height>
+   </rect>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/* TrackDeck "Retro" skin: an original late-90s desktop player look:
+   bevelled grey panels, a black LCD display with green text */
+
+/* monospaced text in the player and its menus only, not in dialogs such
+   as the tag editor or Preferences */
+#borderWidget, #borderWidget *, QMenu, QToolTip {
+	font-family: "Menlo", "Consolas", "DejaVu Sans Mono", monospace;
+}
+
+#borderWidget {
+	background: #3B3D4A;
+	border-top: 2px solid #6B6E80;
+	border-left: 2px solid #6B6E80;
+	border-bottom: 2px solid #15161C;
+	border-right: 2px solid #15161C;
+}
+
+#splitTop {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4A4C5C, stop: 1 #34363F);
+}
+
+/* title bar: a dark blue strip */
+#titleWidget {
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #1E2A5A, stop: 0.5 #33458C, stop: 1 #1E2A5A);
+	border-top: 1px solid #5A6AAA;
+	border-bottom: 1px solid #0E1430;
+}
+#titleLabel {
+	color: #E2E6FF;
+	font-size: 11px;
+	font-weight: bold;
+	letter-spacing: 1px;
+}
+#minimizeButton, #closeButton, #menuButton {
+	background: #B8BAC6;
+	border-top: 1px solid #F0F1F6;
+	border-left: 1px solid #F0F1F6;
+	border-bottom: 1px solid #50525E;
+	border-right: 1px solid #50525E;
+	border-radius: 0;
+	padding: 1px;
+	min-width: 18px; max-width: 18px;
+	min-height: 16px; max-height: 16px;
+	qproperty-iconSize: 12px;
+}
+#minimizeButton:pressed, #menuButton:pressed, #closeButton:pressed {
+	border-top: 1px solid #50525E;
+	border-left: 1px solid #50525E;
+	border-bottom: 1px solid #F0F1F6;
+	border-right: 1px solid #F0F1F6;
+	background: #A2A4B2;
+}
+#closeButton { qproperty-icon: url(close.svg); }
+#minimizeButton { qproperty-icon: url(minimize.svg); }
+#menuButton { qproperty-icon: url(menu.svg); }
+
+/* the LCD: a sunken black panel with green text */
+#lcdPanel {
+	background: #000000;
+	border-top: 2px solid #15161C;
+	border-left: 2px solid #15161C;
+	border-bottom: 2px solid #6B6E80;
+	border-right: 2px solid #6B6E80;
+}
+#coverWidget {
+	background: #0A0F0A;
+	border: 1px solid #1F3A24;
+}
+#trackTitleLabel {
+	color: #00E05A;
+	font-size: 17px;
+	font-weight: bold;
+}
+#trackArtistLabel {
+	color: #00B048;
+	font-size: 13px;
+}
+#trackMetaLabel {
+	color: #E8C21A;
+	font-size: 12px;
+}
+
+/* waveform: also on a black LCD */
+#waveformSlider {
+	qproperty-radius: 0;
+	qproperty-background: #000000;
+	qproperty-wave_background: #0E5A2A;
+	qproperty-wave_border_color: #00E05A;
+	qproperty-progress_playing_background: #00A040;
+	qproperty-progress_paused_background: #8A7A20;
+	qproperty-playing_composition: Overlay;
+	qproperty-paused_composition: Overlay;
+	qproperty-groove_playing_background: #FFFFFF;
+	qproperty-groove_paused_background: #E8C21A;
+	qproperty-file_drop_border_color: #00E05A;
+	qproperty-file_drop_background: rgba(0, 224, 90, 40);
+	border-top: 2px solid #15161C;
+	border-left: 2px solid #15161C;
+	border-bottom: 2px solid #6B6E80;
+	border-right: 2px solid #6B6E80;
+}
+NTrackInfoWidget {
+	margin: 3;
+}
+NTrackInfoWidget QLabel {
+	color: #00E05A;
+	font-size: 11px;
+	font-weight: bold;
+	max-height: 16px;
+	background: rgba(0, 0, 0, 200);
+	border-radius: 0;
+	padding: 0 3;
+}
+NTrackInfoWidget #MiddleCenter {
+	font-size: 12px;
+}
+
+/* transport: raised grey buttons that look pressed in when clicked */
+#prevButton, #nextButton, #stopButton, #playButton,
+#shuffleButton, #repeatButton {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #D2D4DE, stop: 1 #A6A8B6);
+	border-top: 2px solid #F4F5FA;
+	border-left: 2px solid #F4F5FA;
+	border-bottom: 2px solid #4A4C58;
+	border-right: 2px solid #4A4C58;
+	border-radius: 0;
+	min-width: 40px; max-width: 40px;
+	min-height: 26px; max-height: 26px;
+	qproperty-iconSize: 16px;
+}
+#playButton {
+	min-width: 52px; max-width: 52px;
+}
+#prevButton:hover, #nextButton:hover, #stopButton:hover, #playButton:hover,
+#shuffleButton:hover, #repeatButton:hover {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #E2E4EC, stop: 1 #B6B8C6);
+}
+#prevButton:pressed, #nextButton:pressed, #stopButton:pressed, #playButton:pressed,
+#shuffleButton:pressed, #repeatButton:pressed,
+#shuffleButton:checked, #repeatButton:checked {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #9496A4, stop: 1 #B4B6C2);
+	border-top: 2px solid #4A4C58;
+	border-left: 2px solid #4A4C58;
+	border-bottom: 2px solid #F4F5FA;
+	border-right: 2px solid #F4F5FA;
+}
+#shuffleButton:checked, #repeatButton:checked {
+	/* a lit green "LED" along the bottom when on */
+	border-bottom: 3px solid #00E05A;
+}
+#prevButton { qproperty-icon: url(prev.svg); }
+#nextButton { qproperty-icon: url(next.svg); }
+#stopButton { qproperty-icon: url(stop.svg); }
+#playButton { qproperty-icon: url(play.svg); }
+#shuffleButton { qproperty-icon: url(shuffle.svg); }
+#repeatButton { qproperty-icon: url(repeat.svg); }
+
+#volumeIcon {
+	image: url(volume.svg);
+}
+#volumeSlider::groove:horizontal {
+	background: #000000;
+	height: 6px;
+	border-top: 1px solid #15161C;
+	border-bottom: 1px solid #6B6E80;
+}
+#volumeSlider::sub-page:horizontal {
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #00A040, stop: 0.7 #E8C21A, stop: 1 #E04020);
+}
+#volumeSlider::handle:horizontal {
+	background: #C8CAD6;
+	border-top: 1px solid #F4F5FA;
+	border-left: 1px solid #F4F5FA;
+	border-bottom: 1px solid #4A4C58;
+	border-right: 1px solid #4A4C58;
+	width: 10px;
+	margin: -6px 0;
+}
+
+#mainWindow &gt; QSizeGrip, #sizeGrip {
+	image: url(grip.svg);
+	width: 14px;
+	height: 14px;
+}
+
+/* splitter between player and playlist */
+#splitter {
+	background: #3B3D4A;
+}
+#splitter::handle {
+	background: #3B3D4A;
+	border-top: 1px solid #6B6E80;
+	border-bottom: 1px solid #15161C;
+}
+
+/* playlist: green text on black, a blue bar for the selection */
+#playlistWidget {
+	color: #00E05A;
+	background: #000000;
+	border-top: 2px solid #15161C;
+	border-left: 2px solid #15161C;
+	border-bottom: 2px solid #6B6E80;
+	border-right: 2px solid #6B6E80;
+	padding: 2px 4px;
+	outline: none;
+	font-size: 12px;
+	qproperty-playing_text_color: #FFFFFF;
+	qproperty-failed_text_color: #3A5A44;
+	qproperty-file_drop_border_color: #00E05A;
+	qproperty-file_drop_background: rgba(0, 224, 90, 40);
+	qproperty-file_drop_radius: 0;
+}
+#playlistWidget::item {
+	padding: 2px 3px;
+	border: none;
+	border-radius: 0;
+	margin: 0;
+}
+#playlistWidget::item:hover {
+	background: #0A1A10;
+}
+#playlistWidget::item:selected {
+	background: #1030B0;
+	color: #FFFFFF;
+}
+#playlistWidget QHeaderView::section {
+	color: #1B1C22;
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #C8CAD6, stop: 1 #A2A4B2);
+	border-top: 1px solid #F0F1F6;
+	border-left: 1px solid #F0F1F6;
+	border-bottom: 1px solid #50525E;
+	border-right: 1px solid #50525E;
+	padding: 1px 4px;
+	font-size: 11px;
+	font-weight: bold;
+}
+#playlistWidget QScrollBar:vertical {
+	background: #24252E;
+	width: 14px;
+	margin: 0;
+}
+#playlistWidget QScrollBar::handle:vertical {
+	background: #B0B2C0;
+	border-top: 1px solid #F0F1F6;
+	border-left: 1px solid #F0F1F6;
+	border-bottom: 1px solid #50525E;
+	border-right: 1px solid #50525E;
+	min-height: 28px;
+}
+#playlistWidget QScrollBar::add-line, #playlistWidget QScrollBar::sub-line,
+#playlistWidget QScrollBar::add-page, #playlistWidget QScrollBar::sub-page {
+	height: 0px;
+	background: transparent;
+}
+
+/* pop-up menus */
+QMenu {
+	background: #2C2E38;
+	border-top: 1px solid #6B6E80;
+	border-left: 1px solid #6B6E80;
+	border-bottom: 1px solid #15161C;
+	border-right: 1px solid #15161C;
+	padding: 3px 0;
+}
+QMenu::item {
+	color: #E2E4EE;
+	background: transparent;
+	padding: 4px 24px 4px 28px;
+}
+QMenu::item:selected {
+	background: #1030B0;
+	color: #FFFFFF;
+}
+QMenu::item:disabled {
+	color: #6B6E80;
+	background: transparent;
+}
+QMenu::separator {
+	height: 1px;
+	background: #15161C;
+	border-bottom: 1px solid #50525E;
+	margin: 3px 6px;
+}
+QMenu::indicator {
+	width: 14px;
+	height: 14px;
+	left: 8px;
+}
+QMenu::indicator:checked {
+	image: url(check.svg);
+}
+QMenu::right-arrow {
+	image: url(chevron.svg);
+	width: 12px;
+	height: 12px;
+	margin-right: 8px;
+}
+QMenu::icon {
+	padding-left: 8px;
+}
+
+QToolTip {
+	color: #00E05A;
+	background: #000000;
+	border: 1px solid #00A040;
+	padding: 3px;
+}</string>
+  </property>
+  <property name="sizeGripEnabled">
+   <bool>true</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QWidget" name="borderWidget" native="true">
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
+     <layout class="QVBoxLayout" name="borderLayout">
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <property name="leftMargin">
+       <number>1</number>
+      </property>
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <property name="rightMargin">
+       <number>1</number>
+      </property>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="QSplitter" name="splitter">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="handleWidth">
+         <number>7</number>
+        </property>
+        <property name="childrenCollapsible">
+         <bool>true</bool>
+        </property>
+        <widget class="QWidget" name="splitTop" native="true">
+         <layout class="QVBoxLayout" name="splitTopLayout">
+          <property name="spacing">
+           <number>8</number>
+          </property>
+          <property name="leftMargin">
+           <number>8</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>8</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="titleWidget" native="true">
+            <layout class="QHBoxLayout" name="titleBarLayout">
+             <property name="spacing">
+              <number>4</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QToolButton" name="closeButton">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Close</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>16</width>
+                 <height>16</height>
+                </size>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="minimizeButton">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Minimize</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>16</width>
+                 <height>16</height>
+                </size>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="titleBarSpacerLeft">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="NLabel" name="titleLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                 <horstretch>1</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="titleBarSpacerRight">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QToolButton" name="menuButton">
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Menu</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>16</width>
+                 <height>16</height>
+                </size>
+               </property>
+               <property name="autoRaise">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="lcdPanel" native="true">
+           <layout class="QHBoxLayout" name="headerLayout" stretch="0,2,3">
+            <property name="spacing">
+             <number>10</number>
+            </property>
+            <property name="leftMargin">
+             <number>8</number>
+            </property>
+            <property name="topMargin">
+             <number>6</number>
+            </property>
+            <property name="rightMargin">
+             <number>8</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item>
+             <widget class="NCoverWidget" name="coverWidget">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>76</width>
+                <height>76</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>76</width>
+                <height>76</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="trackTextLayout">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+              <item>
+               <spacer name="trackTextSpacerTop">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>10</width>
+                  <height>10</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="trackTitleLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>TrackDeck</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="trackArtistLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Drop music here to start</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="trackMetaLabel">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+                  <horstretch>1</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="trackTextSpacerBottom">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>10</width>
+                  <height>10</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="NSpectrumWidget" name="spectrumWidget" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>3</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>76</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>76</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="NWaveformSlider" name="waveformSlider" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>56</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="controlsContainer" native="true">
+            <layout class="QHBoxLayout" name="controlsLayout">
+             <property name="spacing">
+              <number>6</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QWidget" name="controlsLeft" native="true">
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>150</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <layout class="QHBoxLayout" name="controlsLeftLayout">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QToolButton" name="stopButton">
+                  <property name="minimumSize">
+                   <size>
+                    <width>36</width>
+                    <height>36</height>
+                   </size>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Stop</string>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>16</width>
+                    <height>16</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="controlsLeftSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>10</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <spacer name="transportSpacerLeft">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>10</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QToolButton" name="shuffleButton">
+               <property name="minimumSize">
+                <size>
+                 <width>36</width>
+                 <height>36</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Shuffle</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>18</width>
+                 <height>18</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="prevButton">
+               <property name="minimumSize">
+                <size>
+                 <width>36</width>
+                 <height>36</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Previous</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="playButton">
+               <property name="minimumSize">
+                <size>
+                 <width>48</width>
+                 <height>48</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>48</width>
+                 <height>48</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Play / Pause</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>22</width>
+                 <height>22</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="nextButton">
+               <property name="minimumSize">
+                <size>
+                 <width>36</width>
+                 <height>36</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Next</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QToolButton" name="repeatButton">
+               <property name="minimumSize">
+                <size>
+                 <width>36</width>
+                 <height>36</height>
+                </size>
+               </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
+               <property name="toolTip">
+                <string>Repeat</string>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>18</width>
+                 <height>18</height>
+                </size>
+               </property>
+               <property name="checkable">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="transportSpacerRight">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>10</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QWidget" name="controlsRight" native="true">
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>150</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <layout class="QHBoxLayout" name="controlsRightLayout">
+                <property name="spacing">
+                 <number>8</number>
+                </property>
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <spacer name="controlsRightSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>4</width>
+                    <height>10</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="volumeIcon">
+                  <property name="minimumSize">
+                   <size>
+                    <width>18</width>
+                    <height>18</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>18</width>
+                    <height>18</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="NVolumeSlider" name="volumeSlider">
+                  <property name="minimumSize">
+                   <size>
+                    <width>100</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>100</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="focusPolicy">
+                   <enum>Qt::NoFocus</enum>
+                  </property>
+                  <property name="toolTip">
+                   <string>Volume</string>
+                  </property>
+                  <property name="maximum">
+                   <number>100</number>
+                  </property>
+                  <property name="singleStep">
+                   <number>2</number>
+                  </property>
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="NPlaylistWidget" name="playlistWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="acceptDrops">
+          <bool>true</bool>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>false</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+     <widget class="QSizeGrip" name="sizeGrip" native="true">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>14</width>
+        <height>14</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NWaveformSlider</class>
+   <extends>QWidget</extends>
+   <header>waveformSlider.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NPlaylistWidget</class>
+   <extends>QListWidget</extends>
+   <header>playlistWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>NLabel</class>
+   <extends>QLabel</extends>
+   <header>label.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QSizeGrip</class>
+   <extends>QWidget</extends>
+   <header>qsizegrip.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NCoverWidget</class>
+   <extends>QLabel</extends>
+   <header>coverWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>NVolumeSlider</class>
+   <extends>QSlider</extends>
+   <header>volumeSlider.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

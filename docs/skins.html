@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skins &middot; TrackDeck</title>
+<meta name="description" content="The skins that come with TrackDeck, the free music player for DJs: Modern, Khoshekh, Retro, Metro, Silver and Slim.">
+<meta property="og:title" content="TrackDeck skins">
+<meta property="og:description" content="Modern, Khoshekh, Retro, Metro, Silver and Slim: the looks that come with TrackDeck.">
+<meta property="og:image" content="https://khoshekh-dj.github.io/trackdeck/assets/skins/retro.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<style>
+  :root {
+    --paper: #efebe3;
+    --paper-2: #e6e1d6;
+    --ink: #141414;
+    --soft: #5f5a52;
+    --signal: #ff4f1a;
+    --rule: 1px solid var(--ink);
+    --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --max: 1240px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.5 var(--sans);
+         -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  img { max-width: 100%; height: auto; display: block; }
+  .page { max-width: var(--max); margin: 0 auto; padding: 0 32px; }
+  .mono { font-family: var(--mono); font-size: 13px; letter-spacing: 0.02em; text-transform: uppercase; }
+  .soft { color: var(--soft); }
+
+  /* masthead */
+  .mast { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 32px;
+          padding: 18px 0; border-bottom: var(--rule); }
+  .mast .name { font-weight: 700; letter-spacing: 0.18em; font-size: 15px; text-decoration: none; }
+  .mast nav { display: flex; gap: 28px; }
+  .mast nav a { text-decoration: none; }
+  .mast nav a:hover, .mast nav a:focus { color: var(--signal); }
+
+  /* hero */
+  .hero { display: grid; grid-template-columns: 7fr 5fr; gap: 48px; padding: 64px 0 48px; border-bottom: var(--rule); }
+  h1 { font-size: clamp(56px, 9.5vw, 132px); line-height: 0.92; letter-spacing: -0.045em; font-weight: 700; margin: 0; }
+  h1 em { font-style: normal; color: var(--signal); }
+  .hero .side { display: flex; flex-direction: column; justify-content: flex-end; gap: 22px; }
+  .hero .side p { margin: 0; font-size: 19px; max-width: 30em; }
+  .buttons { display: grid; gap: 10px; }
+  .btn { display: flex; justify-content: space-between; align-items: center; padding: 15px 18px;
+         background: var(--ink); color: var(--paper); text-decoration: none; font-weight: 700; font-size: 16px;
+         border: var(--rule); }
+  .btn span:last-child { font-family: var(--mono); font-weight: 400; font-size: 13px; }
+  .btn:hover, .btn:focus { background: var(--signal); border-color: var(--signal); color: var(--ink); }
+  .btn.ghost { background: transparent; color: var(--ink); }
+  .btn.ghost:hover, .btn.ghost:focus { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .btn.mine { outline: 3px solid var(--signal); outline-offset: 2px; }
+  .facts { display: flex; gap: 18px; flex-wrap: wrap; }
+
+  /* figures */
+  figure { margin: 0; }
+  .plate { padding: 40px 0 0; }
+  .plate img, .styles img, .pair img { border: var(--rule); }
+  figcaption { display: flex; justify-content: space-between; gap: 24px; padding: 10px 0 0; }
+
+  /* sides and numbered rows */
+  .side-head { display: grid; grid-template-columns: 1fr auto; align-items: end; padding: 72px 0 14px; border-bottom: var(--rule); }
+  .side-head h2 { margin: 0; font-size: clamp(34px, 5vw, 56px); letter-spacing: -0.03em; line-height: 1; }
+  .row { display: grid; grid-template-columns: 72px 260px 1fr; gap: 24px; padding: 22px 0; border-bottom: var(--rule); align-items: baseline; }
+  .row .no { font-family: var(--mono); font-size: 14px; }
+  .row h3 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
+  .row p { margin: 0; max-width: 42em; }
+  .row p + p { margin-top: 10px; }
+  .row .note { font-family: var(--mono); font-size: 13px; color: var(--soft); }
+
+  .styles { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 28px 0 8px; }
+  .pair { display: grid; grid-template-columns: 5fr 7fr; gap: 48px; padding: 36px 0 8px; align-items: start; }
+  .pair ul { margin: 0; padding: 0; list-style: none; border-top: var(--rule); }
+  .pair li { padding: 12px 0; border-bottom: var(--rule); }
+  .pair li b { display: inline-block; min-width: 7.5em; }
+  .camelot { font-family: var(--mono); font-size: 13px; display: grid; grid-template-columns: repeat(12, 1fr);
+             border: var(--rule); margin-top: 18px; max-width: 42em; }
+  .camelot span { padding: 6px 0; text-align: center; border-right: var(--rule); }
+  .camelot span:last-child { border-right: 0; }
+  .camelot span.on { background: var(--ink); color: var(--paper); }
+
+  /* download table */
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th, td { text-align: left; padding: 18px 16px 18px 0; border-bottom: var(--rule); vertical-align: top; }
+  th { font-family: var(--mono); font-weight: 400; font-size: 13px; text-transform: uppercase; color: var(--soft); padding-top: 22px; }
+  td.platform { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; width: 16%; }
+  td .btn { display: inline-flex; gap: 28px; }
+  td ol { margin: 0; padding-left: 18px; }
+  td li + li { margin-top: 6px; }
+  code { font-family: var(--mono); font-size: 13px; background: var(--paper-2); padding: 1px 5px; }
+  pre { margin: 8px 0 0; background: var(--paper-2); padding: 10px 12px; white-space: pre-wrap; word-break: break-all; }
+  pre code { background: none; padding: 0; }
+
+  /* support */
+  .support { display: grid; grid-template-columns: 7fr 5fr; gap: 48px; padding: 28px 0 0; align-items: end; }
+  .support p { margin: 0; font-size: 19px; max-width: 32em; }
+  .support .buttons { gap: 8px; }
+  .support .handle { margin-top: 8px; }
+
+  /* specs + credits */
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 28px 0 0; }
+  dl { margin: 0; font-family: var(--mono); font-size: 14px; display: grid; grid-template-columns: 11em 1fr; }
+  dt, dd { margin: 0; padding: 9px 0; border-bottom: var(--rule); }
+  dt { text-transform: uppercase; color: var(--soft); }
+  .notes p { margin: 0 0 14px; }
+  .notes .mono { display: block; margin-bottom: 2px; color: var(--soft); }
+
+  footer { margin-top: 80px; border-top: var(--rule); padding: 18px 0 40px;
+           display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  footer a { text-decoration: none; }
+  footer a:hover { color: var(--signal); }
+
+  @media (max-width: 900px) {
+    .page { padding: 0 20px; }
+    .mast { grid-template-columns: 1fr auto; }
+    .mast nav { display: none; }
+    .hero, .pair, .cols, .support { grid-template-columns: 1fr; gap: 28px; }
+    .row { grid-template-columns: 40px 1fr; }
+    .row .body { grid-column: 2; }
+    .styles { grid-template-columns: 1fr; }
+    figcaption { flex-direction: column; gap: 2px; }
+    table, tbody, tr, td { display: block; }
+    thead { display: none; }
+    td { border-bottom: 0; padding: 8px 0; }
+    tr { border-bottom: var(--rule); padding: 14px 0; }
+    td.platform { width: auto; }
+    .camelot { grid-template-columns: repeat(6, 1fr); }
+    .camelot span:nth-child(6) { border-right: 0; }
+    .camelot span:nth-child(-n+6) { border-bottom: var(--rule); }
+    dl { grid-template-columns: 8em 1fr; }
+  }
+
+  /* skins page */
+  .intro { display: grid; grid-template-columns: 7fr 5fr; gap: 48px; padding: 64px 0 40px; border-bottom: var(--rule); }
+  .intro h1 { font-size: clamp(56px, 9vw, 120px); }
+  .intro .side { display: flex; flex-direction: column; justify-content: flex-end; gap: 14px; }
+  .intro .side p { margin: 0; font-size: 19px; max-width: 30em; }
+  .skin { display: grid; grid-template-columns: 4fr 8fr; gap: 48px; padding: 40px 0; border-bottom: var(--rule); align-items: start; }
+  .skin .no { font-family: var(--mono); font-size: 14px; }
+  .skin h2 { margin: 6px 0 12px; font-size: clamp(30px, 4vw, 44px); letter-spacing: -0.03em; line-height: 1; }
+  .skin h2 .tag { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; font-weight: 400; text-transform: uppercase;
+                  background: var(--signal); color: var(--ink); padding: 3px 7px; vertical-align: middle; margin-left: 8px; }
+  .skin p { margin: 0 0 10px; max-width: 30em; }
+  .skin ul { margin: 14px 0 0; padding: 0; list-style: none; border-top: var(--rule); font-family: var(--mono); font-size: 13px; }
+  .skin li { padding: 8px 0; border-bottom: var(--rule); }
+  .skin img { border: var(--rule); }
+  .how { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 28px 0 0; }
+  .how p { margin: 0 0 12px; max-width: 34em; }
+  .how ol { margin: 0; padding-left: 20px; }
+  .how li + li { margin-top: 6px; }
+  @media (max-width: 900px) {
+    .intro, .skin, .how { grid-template-columns: 1fr; gap: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="mast">
+    <a class="name" href="index.html">TRACKDECK</a>
+    <nav class="mono">
+      <a href="index.html#side-a">Features</a>
+      <a href="skins.html" aria-current="page" style="color: var(--signal)">Skins</a>
+      <a href="index.html#download">Download</a>
+      <a href="index.html#support">Support</a>
+      <a href="https://github.com/khoshekh-dj/trackdeck">Source</a>
+    </nav>
+    <span class="mono">Cat. TD &middot; Skins</span>
+  </header>
+
+  <section class="intro">
+    <h1>Six<br>looks.</h1>
+    <div class="side">
+      <p>TrackDeck comes with six skins. Every one has the same features: the RGB waveform, the playlist columns, BPM and key.</p>
+      <p class="mono soft">Preferences &rarr; General &rarr; Skin, then restart</p>
+    </div>
+  </section>
+
+  <section class="skin" id="modern">
+    <div>
+      <span class="no">01</span>
+      <h2>Modern</h2>
+      <p>The default. Dark and clean, with large album art, the live visualiser across the top and a roomy playlist.</p>
+      <ul><li>Follows your accent colour</li><li>Album art can fill the window background</li><li>Shown: blue accent, LED-segment visualiser</li></ul>
+    </div>
+    <figure><img src="assets/skins/modern.jpg" width="1600" height="711" alt="TrackDeck in the Modern skin" loading="lazy"><figcaption class="mono"><span>Modern</span><span class="soft">Demo playlist</span></figcaption></figure>
+  </section>
+  <section class="skin" id="khoshekh">
+    <div>
+      <span class="no">02</span>
+      <h2>Khoshekh</h2>
+      <p>Deep night-sky navy with a teal glow rising from the horizon, after the artwork of the Khoshekh DJ mixes.</p>
+      <ul><li>Teal by default, or follows your accent colour</li><li>Album art can fill the window background</li><li>Shown: teal, mirrored visualiser</li></ul>
+    </div>
+    <figure><img src="assets/skins/khoshekh.jpg" width="1600" height="711" alt="TrackDeck in the Khoshekh skin" loading="lazy"><figcaption class="mono"><span>Khoshekh</span><span class="soft">Demo playlist</span></figcaption></figure>
+  </section>
+  <section class="skin" id="retro">
+    <div>
+      <span class="no">03</span>
+      <h2>Retro <span class="tag">New</span></h2>
+      <p>A tribute to the desktop players of the late '90s: bevelled grey panels, push-in buttons, and a black display with green text.</p>
+      <ul><li>Monospaced text throughout</li><li>Shuffle and Repeat light up when on</li><li>Fixed colours: ignores the accent colour</li></ul>
+    </div>
+    <figure><img src="assets/skins/retro.jpg" width="1600" height="711" alt="TrackDeck in the Retro skin" loading="lazy"><figcaption class="mono"><span>Retro</span><span class="soft">Demo playlist</span></figcaption></figure>
+  </section>
+  <section class="skin" id="metro">
+    <div>
+      <span class="no">04</span>
+      <h2>Metro</h2>
+      <p>From Nulloy. Flat and dark, with album art next to a tall waveform and round transport buttons.</p>
+      <ul><li>Light and dark versions (button at the top right)</li><li>No visualiser</li></ul>
+    </div>
+    <figure><img src="assets/skins/metro.jpg" width="1600" height="622" alt="TrackDeck in the Metro skin" loading="lazy"><figcaption class="mono"><span>Metro</span><span class="soft">Demo playlist</span></figcaption></figure>
+  </section>
+  <section class="skin" id="silver">
+    <div>
+      <span class="no">05</span>
+      <h2>Silver</h2>
+      <p>From Nulloy. A light grey look with a white playlist and small square buttons.</p>
+      <ul><li>Light theme</li><li>No visualiser</li></ul>
+    </div>
+    <figure><img src="assets/skins/silver.jpg" width="1600" height="622" alt="TrackDeck in the Silver skin" loading="lazy"><figcaption class="mono"><span>Silver</span><span class="soft">Demo playlist</span></figcaption></figure>
+  </section>
+  <section class="skin" id="slim">
+    <div>
+      <span class="no">06</span>
+      <h2>Slim</h2>
+      <p>From Nulloy. Everything in one thin strip above the playlist, for when screen space is tight.</p>
+      <ul><li>Compact</li><li>Small album art, no visualiser</li></ul>
+    </div>
+    <figure><img src="assets/skins/slim.jpg" width="1600" height="367" alt="TrackDeck in the Slim skin" loading="lazy"><figcaption class="mono"><span>Slim</span><span class="soft">Demo playlist</span></figcaption></figure>
+  </section>
+
+  <div class="side-head"><h2>Make your own</h2><span class="mono soft">DIY</span></div>
+  <div class="how">
+    <div>
+      <p>A skin is a zip file with the <code>.nzs</code> extension. Inside it are a Qt Designer layout (<code>form.ui</code>) with a stylesheet, a script (<code>script.js</code>) and the button images.</p>
+      <p>The easiest way to start is to copy one of the built-in skins from <a href="https://github.com/khoshekh-dj/trackdeck/tree/main/src/skins">src/skins</a> and change its colours.</p>
+    </div>
+    <ol>
+      <li>Copy a skin folder, such as <code>retro</code>, and give it a new name in <code>id.txt</code>.</li>
+      <li>Edit the colours in the stylesheet at the top of <code>form.ui</code>.</li>
+      <li>Zip the folder&rsquo;s files into <code>yourskin.nzs</code> and put it in TrackDeck&rsquo;s <code>skins</code> folder.</li>
+      <li>Choose it in Preferences and restart. Skins are shared under CC-BY-SA 3.0.</li>
+    </ol>
+  </div>
+
+  <footer class="mono">
+    <span>&copy; 2026 Khoshekh &middot; GPL-3.0</span>
+    <span><a href="index.html">Home</a> &nbsp;&middot;&nbsp; <a href="https://github.com/khoshekh-dj/trackdeck">Source</a> &nbsp;&middot;&nbsp; <a href="https://github.com/khoshekh-dj/trackdeck/releases">Releases</a> &nbsp;&middot;&nbsp; <a href="https://ko-fi.com/dj_khoshekh" rel="noopener">Ko-fi</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

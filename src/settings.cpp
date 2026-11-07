@@ -181,9 +181,24 @@ NSettings::NSettings(QObject *parent)
         *.mp3 *.ogg *.mp4 *.wma \
         *.flac *.ape *.wav *.wv *.tta \
         *.mpc *.spx *.opus \
-        *.m4a *.aac *.aiff \
+        *.m4a *.aac *.aiff *.aif *.aifc \
         *.xm *.s3m *.it *.mod")
                                  .simplified());
+    // settings saved by older versions keep their own list: add file types
+    // that were missing from it (.aif is the usual AIFF name from DJ stores)
+    {
+        QStringList filters = value("FileFilters").toString().split(' ', Qt::SkipEmptyParts);
+        bool added = false;
+        for (const QString &ext : {QString("*.aif"), QString("*.aifc")}) {
+            if (!filters.contains(ext, Qt::CaseInsensitive)) {
+                filters << ext;
+                added = true;
+            }
+        }
+        if (added) {
+            setValue("FileFilters", filters.join(' '));
+        }
+    }
 
     initValue("TrackInfo/TopLeft", "{%B kbps/%s kHz|{%B kbps}{%s kHz}}");
     initValue("TrackInfo/MiddleCenter", "{%a - %t|%F}");
