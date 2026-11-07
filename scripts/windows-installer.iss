@@ -2,8 +2,8 @@
 ;
 ; Built by CI after scripts/package-windows.sh, from the same packaged folder
 ; as the portable .zip:
-;   ISCC /DAppVersion=1.3.1 /DSourceDir=dist\TrackDeck-windows\TrackDeck
-;        /DIconDir=tmp /DOutputDir=dist /DOutputBase=TrackDeck-1.3.1-Windows-x64-Setup
+;   ISCC /DAppVersion=1.3.2 /DSourceDir=dist\TrackDeck-windows\TrackDeck
+;        /DIconDir=tmp /DOutputDir=dist /DOutputBase=TrackDeck-1.3.2-Windows-x64-Setup
 ;        scripts\windows-installer.iss
 ;
 ; Installs for the current user by default (no admin prompt), into

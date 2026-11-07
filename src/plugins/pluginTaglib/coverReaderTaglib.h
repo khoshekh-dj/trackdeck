@@ -27,6 +27,9 @@
 #include <mpegfile.h>
 #include <vorbisfile.h>
 #include <wavpackfile.h>
+#include <aifffile.h>
+#include <opusfile.h>
+#include <wavfile.h>
 
 #include "coverReaderInterface.h"
 #include "plugin.h"

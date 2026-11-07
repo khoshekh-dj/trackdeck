@@ -161,6 +161,20 @@ QList<QImage> NCoverReaderTaglib::fromVorbis(TagLib::Tag *tag) const
 {
     QList<QImage> images;
     if (auto *comment = dynamic_cast<TagLib::Ogg::XiphComment *>(tag)) {
+        // METADATA_BLOCK_PICTURE (Opus, newer Ogg Vorbis) holds a FLAC picture
+        // block, not a bare image: TagLib decodes those for us
+        const TagLib::List<TagLib::FLAC::Picture *> pictures = comment->pictureList();
+        for (TagLib::FLAC::Picture *picture : pictures) {
+            QImage image;
+            const TagLib::ByteVector data = picture->data();
+            if (image.loadFromData(reinterpret_cast<const uchar *>(data.data()), data.size())) {
+                images << image;
+            }
+        }
+        if (!images.isEmpty()) {
+            return images;
+        }
+
         TagLib::String str = "COVERART";
 
         if (!comment->contains(str)) {
@@ -226,6 +240,19 @@ QList<QImage> NCoverReaderTaglib::getImages() const
     } else if (auto *file = dynamic_cast<TagLib::Ogg::Vorbis::File *>(tagFile)) {
         if (file->tag()) {
             images = fromVorbis(file->tag());
+        }
+    } else if (auto *file = dynamic_cast<TagLib::Ogg::Opus::File *>(tagFile)) {
+        if (file->tag()) {
+            images = fromVorbis(file->tag());
+        }
+    } else if (auto *file = dynamic_cast<TagLib::RIFF::AIFF::File *>(tagFile)) {
+        // AIFF keeps its tags, artwork included, in an ID3v2 chunk
+        if (file->hasID3v2Tag()) {
+            images = fromId3(file->tag());
+        }
+    } else if (auto *file = dynamic_cast<TagLib::RIFF::WAV::File *>(tagFile)) {
+        if (file->hasID3v2Tag()) {
+            images = fromId3(file->ID3v2Tag());
         }
     } else if (auto *file = dynamic_cast<TagLib::WavPack::File *>(tagFile)) {
         if (file->APETag()) {
