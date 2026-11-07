@@ -18,9 +18,17 @@
 
 #include "playlistDataItem.h"
 
+class QComboBox;
+
 namespace NUtils
 {
     QList<NPlaylistDataItem> dirListRecursive(const QString &path);
+
+    // Fills a combo box with the text encodings used for old, non-Unicode
+    // tags, named by language ("Cyrillic (Windows-1251)"), with the codec
+    // name as item data, and selects `current` (added by its own name if it
+    // isn't in the list). Returns the index of "Automatic (Unicode)".
+    int fillEncodingComboBox(QComboBox *comboBox, const QString &current);
 } // namespace NUtils
 
 #endif

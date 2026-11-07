@@ -14,6 +14,7 @@
 *********************************************************************/
 
 #include "tagEditorDialog.h"
+#include "utils.h"
 
 #include "coverWidget.h"
 #include "pluginLoader.h"
@@ -130,44 +131,8 @@ NTagEditorDialog::NTagEditorDialog(const QStringList &files, QWidget *parent) : 
     // Only for old tags written in a regional 8-bit encoding (e.g. Russian
     // tags from Windows-era rippers showing as "Àëèñà"). Modern tags are
     // Unicode and need nothing, so the list is hidden until asked for.
-    const QList<QPair<QString, QString>> encodings = {
-        {"UTF-8", tr("Automatic (Unicode)")},
-        {"windows-1252", tr("Western European (Windows-1252)")},
-        {"windows-1250", tr("Central European (Windows-1250)")},
-        {"windows-1251", tr("Cyrillic (Windows-1251)")},
-        {"KOI8-R", tr("Cyrillic (KOI8-R)")},
-        {"windows-1253", tr("Greek (Windows-1253)")},
-        {"windows-1254", tr("Turkish (Windows-1254)")},
-        {"windows-1257", tr("Baltic (Windows-1257)")},
-        {"windows-1255", tr("Hebrew (Windows-1255)")},
-        {"windows-1256", tr("Arabic (Windows-1256)")},
-        {"Shift_JIS", tr("Japanese (Shift-JIS)")},
-        {"GBK", tr("Chinese, Simplified (GBK)")},
-        {"Big5", tr("Chinese, Traditional (Big5)")},
-        {"EUC-KR", tr("Korean (EUC-KR)")},
-        {"TIS-620", tr("Thai (TIS-620)")},
-    };
-    QTextCodec *settingsCodec = QTextCodec::codecForName(settingsEncoding.toUtf8());
-    bool settingsListed = false;
-    for (const auto &e : encodings) {
-        QTextCodec *codec = QTextCodec::codecForName(e.first.toUtf8());
-        if (!codec) {
-            continue;
-        }
-        int i = ui.encodingComboBox->count();
-        ui.encodingComboBox->addItem(e.second, QString(codec->name()));
-        if (e.first == "UTF-8") {
-            m_encodingUtf8Index = i;
-        }
-        if (settingsCodec && codec->mibEnum() == settingsCodec->mibEnum()) {
-            m_encodingSettingsIndex = i;
-            settingsListed = true;
-        }
-    }
-    if (settingsCodec && !settingsListed) { // a codec set in an older version
-        m_encodingSettingsIndex = ui.encodingComboBox->count();
-        ui.encodingComboBox->addItem(QString(settingsCodec->name()), QString(settingsCodec->name()));
-    }
+    m_encodingUtf8Index = NUtils::fillEncodingComboBox(ui.encodingComboBox, settingsEncoding);
+    m_encodingSettingsIndex = ui.encodingComboBox->currentIndex();
     ui.encodingComboBox->setCurrentIndex(m_encodingSettingsIndex);
     m_encodingPreviousIndex = m_encodingSettingsIndex;
     // keep the corner narrow enough for the tabs; the open list is full width

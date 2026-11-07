@@ -1186,8 +1186,11 @@ padding: 5px;</string>
             </item>
             <item>
              <widget class="QLabel" name="encodingTrackInfoLabel">
+              <property name="toolTip">
+               <string>Only for old tags written in a regional encoding that show as gibberish (e.g. "Àëèñà"). Leave on Automatic for everything else.</string>
+              </property>
               <property name="text">
-               <string>Encoding:</string>
+               <string>Old tag text:</string>
               </property>
              </widget>
             </item>
@@ -1217,6 +1220,9 @@ padding: 5px;</string>
             </item>
             <item>
              <widget class="QComboBox" name="encodingTrackInfoComboBox">
+              <property name="toolTip">
+               <string>Only for old tags written in a regional encoding that show as gibberish (e.g. "Àëèñà"). Leave on Automatic for everything else.</string>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>200</width>

@@ -14,6 +14,7 @@
 *********************************************************************/
 
 #include "preferencesDialog.h"
+#include "utils.h"
 
 #include "action.h"
 #include "i18nLoader.h"
@@ -286,15 +287,7 @@ NPreferencesDialog::NPreferencesDialog(NPlayer *player, QWidget *parent) : QDial
 
     ui.waveformTrackInfoTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    int i = 0;
-    foreach (int mib, QTextCodec::availableMibs()) {
-        QString codecName = QTextCodec::codecForMib(mib)->name();
-        ui.encodingTrackInfoComboBox->addItem(codecName, mib);
-        if (codecName == "UTF-8") {
-            ui.encodingTrackInfoComboBox->setCurrentIndex(i);
-        }
-        ++i;
-    }
+    NUtils::fillEncodingComboBox(ui.encodingTrackInfoComboBox, "UTF-8");
     ui.id3v2VersionComboBox->addItem(tr("ID3v2.3 (most compatible)"), 3);
     ui.id3v2VersionComboBox->addItem(tr("ID3v2.4"), 4);
 }
@@ -700,13 +693,8 @@ void NPreferencesDialog::loadSettings()
     // << ID3v2 version
 
     // track info encoding >>
-    QString encoding = NSettings::instance()->value("EncodingTrackInfo").toString();
-    for (int i = 0; i < ui.encodingTrackInfoComboBox->count(); ++i) {
-        if (ui.encodingTrackInfoComboBox->itemText(i) == encoding) {
-            ui.encodingTrackInfoComboBox->setCurrentIndex(i);
-            break;
-        }
-    }
+    NUtils::fillEncodingComboBox(ui.encodingTrackInfoComboBox,
+                                 NSettings::instance()->value("EncodingTrackInfo").toString());
     // << track info encoding
 
     // tooltip offset >>
@@ -881,8 +869,7 @@ void NPreferencesDialog::saveSettings()
 
     // track info encoding >>
     NSettings::instance()->setValue("EncodingTrackInfo",
-                                    ui.encodingTrackInfoComboBox->itemText(
-                                        ui.encodingTrackInfoComboBox->currentIndex()));
+                                    ui.encodingTrackInfoComboBox->currentData().toString());
     // << track info encoding
 
     // ID3v2 version >>
