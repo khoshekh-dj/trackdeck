@@ -255,9 +255,10 @@
     <tbody>
       <tr>
         <td class="platform">macOS</td>
-        <td class="mono">macOS 15 Sequoia or newer<br>Apple Silicon (M1+) or Intel</td>
+        <td class="mono">macOS 15 Sequoia or newer<br>Apple Silicon (M1+) or Intel<br><span id="mac-12-note" style="display: none">Older Intel Mac: macOS 12 Monterey or newer</span></td>
         <td><a class="btn" id="dl-mac" href="https://github.com/khoshekh-dj/trackdeck/releases/latest"><span>Apple Silicon</span><span>&darr;</span></a>
-          <a class="btn ghost" id="dl-mac-intel" href="https://github.com/khoshekh-dj/trackdeck/releases/latest" style="margin-top: 8px"><span>Intel</span><span>&darr;</span></a></td>
+          <a class="btn ghost" id="dl-mac-intel" href="https://github.com/khoshekh-dj/trackdeck/releases/latest" style="margin-top: 8px"><span>Intel</span><span>&darr;</span></a>
+          <a class="btn ghost" id="dl-mac-12" href="https://github.com/khoshekh-dj/trackdeck/releases/latest" style="margin-top: 8px; display: none"><span>macOS 12+ Intel</span><span>&darr;</span></a></td>
         <td><ol>
           <li>Open the <code>.dmg</code> and drag TrackDeck to Applications.</li>
           <li>It isn't notarized yet, so the first time, right-click it and choose <b>Open</b>, or run:
@@ -296,7 +297,7 @@
   <div class="cols">
     <dl>
       <dt>Format</dt><dd>Desktop app, C++ / Qt</dd>
-      <dt>Platforms</dt><dd>macOS 15+ (Apple Silicon and Intel), Windows 10/11 (x64)</dd>
+      <dt>Platforms</dt><dd>macOS 15+ (Apple Silicon and Intel), macOS 12+ (Intel), Windows 10/11 (x64)</dd>
       <dt>Audio</dt><dd>GStreamer, FFmpeg decoders</dd>
       <dt>Tags</dt><dd>TagLib</dd>
       <dt>Tempo</dt><dd>aubio</dd>
@@ -350,8 +351,16 @@
             document.getElementById("btn-mac").href = url;
             document.getElementById("dl-mac").href = url;
           }
-          if (/Intel\.dmg$/i.test(a.name)) {
+          if (/macOS-Intel\.dmg$/i.test(a.name)) {
             document.getElementById("dl-mac-intel").href = url;
+          }
+          // macOS 12 build from the self-hosted Monterey Mac: shown only when
+          // the latest release has one
+          if (/macOS12-Intel\.dmg$/i.test(a.name)) {
+            var b12 = document.getElementById("dl-mac-12");
+            b12.href = url;
+            b12.style.display = "";
+            document.getElementById("mac-12-note").style.display = "";
           }
           if (/Windows.*\.zip$/i.test(a.name)) {
             winZip = url;

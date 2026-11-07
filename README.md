@@ -4,7 +4,7 @@
 
 **TrackDeck** is a music player for DJs. It has an RGB waveform, a live spectrum visualiser, automatic BPM detection, tag-based playlist columns and a modern dark skin. It's based on [Nulloy](https://github.com/nulloy/nulloy) by Sergey Vlasov and is released under the same [GPL-3.0](LICENSE.GPL3) licence.
 
-**Download:** builds for **macOS (Apple Silicon or Intel, macOS 15 Sequoia+)** and **Windows 10/11 (x64)** are in the [releases](https://github.com/khoshekh-dj/trackdeck/releases). On an older Mac, see [Older Macs](#older-macs) below.
+**Download:** builds for **macOS (Apple Silicon or Intel, macOS 15 Sequoia+)**, **macOS 12 Monterey+ (Intel)** and **Windows 10/11 (x64)** are in the [releases](https://github.com/khoshekh-dj/trackdeck/releases). For other older Macs, see [Older Macs](#older-macs) below.
 - macOS: open the `.dmg` and drag TrackDeck to Applications. The app isn't notarized, so the first time, right-click it and choose **Open**.
 - Windows: an installer (`…-Setup.exe`) or a portable `.zip`. The installer installs just for you, with no admin password, and adds TrackDeck to the Start menu; settings go in `%AppData%\TrackDeck`. The `.zip` runs from anywhere, e.g. a USB stick: unzip it and run `TrackDeck\TrackDeck.exe`; it keeps its settings in the same folder. If SmartScreen warns about either, choose **More info → Run anyway**.
 
@@ -207,7 +207,9 @@ The result is not notarized, so on first launch right-click the app and choose *
 
 ### Older Macs
 
-The release builds need macOS 15 Sequoia or newer, because Homebrew's libraries only support recent macOS. To build for an older Mac, such as macOS 12 Monterey, use MacPorts, which compiles everything for the Mac it runs on:
+The main release builds need macOS 15 Sequoia or newer, because Homebrew's libraries only support recent macOS. Each release also has a `macOS12-Intel` download for Intel Macs on macOS 12 Monterey or newer, built with MacPorts on a Monterey Mac (`.github/workflows/macos-12.yml`, a self-hosted runner). Its first launch takes a minute or two while it scans its audio plugins.
+
+To build for another older Mac, such as an Apple Silicon Mac on macOS 12 or 13, use MacPorts, which compiles everything for the Mac it runs on:
 
 ```sh
 xcode-select --install          # Xcode Command Line Tools

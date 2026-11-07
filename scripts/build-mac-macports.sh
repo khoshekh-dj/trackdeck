@@ -57,7 +57,7 @@ macos=$(sw_vers -productVersion | cut -d. -f1)
 if [ "$(uname -m)" = "x86_64" ]; then chip=Intel; else chip=AppleSilicon; fi
 name="TrackDeck-$version-macOS$macos-$chip.dmg"
 mv dist/TrackDeck.dmg "dist/$name"
-shasum -a 256 "dist/$name" | tee "dist/$name.sha256"
+(cd dist && shasum -a 256 "$name" | tee "$name.sha256")
 
 echo
 echo "Built dist/$name"
