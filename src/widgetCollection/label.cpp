@@ -15,6 +15,7 @@
 
 #include "label.h"
 
+#include <QEvent>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QPen>
@@ -82,6 +83,15 @@ void NLabel::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
     updateElidedText();
+}
+
+void NLabel::changeEvent(QEvent *event)
+{
+    QLabel::changeEvent(event);
+    // A skin's stylesheet can set the font after the text, so measure again
+    if (event->type() == QEvent::FontChange || event->type() == QEvent::StyleChange) {
+        updateElidedText();
+    }
 }
 
 void NLabel::updateElidedText()

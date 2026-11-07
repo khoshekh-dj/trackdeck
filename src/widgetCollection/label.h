@@ -43,6 +43,7 @@ private:
 
     void paintEvent(QPaintEvent *event);
     void resizeEvent(QResizeEvent *event);
+    void changeEvent(QEvent *event);
 
     void updateElidedText();
 

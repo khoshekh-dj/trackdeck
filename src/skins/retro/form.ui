@@ -569,7 +569,7 @@ QToolTip {
                </spacer>
               </item>
               <item>
-               <widget class="QLabel" name="trackTitleLabel">
+               <widget class="NLabel" name="trackTitleLabel">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
                   <horstretch>1</horstretch>
@@ -582,7 +582,7 @@ QToolTip {
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="trackArtistLabel">
+               <widget class="NLabel" name="trackArtistLabel">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
                   <horstretch>1</horstretch>
@@ -595,7 +595,7 @@ QToolTip {
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="trackMetaLabel">
+               <widget class="NLabel" name="trackMetaLabel">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
                   <horstretch>1</horstretch>
