@@ -71,6 +71,7 @@ public:
 
 private slots:
     void on_encodingComboBox_activated(int index);
+    void updateTagFormatLabel();
     void onSaveClicked();
     void setReadOnlyMode(bool readOnly);
 };

@@ -54,6 +54,11 @@ public:
 
     // ID3v2 version written to MP3, WAV and AIFF files: 3 or 4
     virtual void setId3v2Version(int version) { Q_UNUSED(version); }
+
+    // The kinds of tag the current file has, e.g. ("ID3v2.4", "ID3v1"), and
+    // whether saving writes ID3v2 (so the ID3v2 version setting applies)
+    virtual QStringList tagFormats() const { return QStringList(); }
+    virtual bool savesId3v2() const { return false; }
 };
 
 Q_DECLARE_INTERFACE(NTagReaderInterface, TAGREADER_INTERFACE)

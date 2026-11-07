@@ -84,6 +84,17 @@ Main.prototype.afterShow = function()
     }
 
     Ui.splitter.setSizes(Settings.value("SilverSkin/Splitter"));
+    Ui.menuButton["clicked()"].connect(this, "showMenu");
+}
+
+Main.prototype.showMenu = function()
+{
+    // below the button, in main-window coordinates
+    var menuPos = Ui.menuWrapperOuter.pos;
+    var titlePos = Ui.titleWidget.pos;
+    menuPos.x += titlePos.x;
+    menuPos.y += titlePos.y + Ui.menuWrapperOuter.height;
+    Player.showContextMenu(menuPos);
 }
 
 Main.prototype.on_stateChanged = function(state)

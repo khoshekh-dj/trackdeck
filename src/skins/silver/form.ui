@@ -191,24 +191,27 @@
 	qproperty-icon: url(next.png);
 }
 
+#menuWrapperOuter,
 #minimizeWrapperOuter,
 #closeWrapperOuter {
 	background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 #EDEDED, stop:0.999 #EDEDED, stop:1 transparent);
 }
+#menuWrapperInner,
 #minimizeWrapperInner,
 #closeWrapperInner {
 	background: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 #4A4A4A, stop:0.98 #4A4A4A, stop:1 transparent);
 }
+#menuButton,
 #minimizeButton,
 #closeButton {
 	border-radius: 8px;
 	border: 2px solid transparent;
 	background: qlineargradient(spread:pad, x1:0, y1:0.1, x2:0, y2:0.9, stop:0 #F8F8F8, stop:1 #B4B4B4);
 }
-#minimizeButton:hover, #closeButton:hover  {
+#menuButton:hover, #minimizeButton:hover, #closeButton:hover  {
 	background: qlineargradient(spread:pad, x1:0, y1:0.1, x2:0, y2:0.9, stop:0 #FFFFFB, stop:1 #FBFFE0);
 }
-#minimizeButton:pressed, #closeButton:pressed {
+#menuButton:pressed, #minimizeButton:pressed, #closeButton:pressed {
 	background: qlineargradient(spread:pad, x1:0, y1:0.1, x2:0, y2:0.9, stop:0 #6F6F6F, stop:1 #B5B5B5);
 	padding-top: 2px;
 }
@@ -217,6 +220,9 @@
 }
 #minimizeButton {
 	qproperty-icon: url(button_minimize.png);
+}
+#menuButton {
+	qproperty-icon: url(button_menu.png);
 }
 
 #volumeWrapper {
@@ -417,6 +423,61 @@ NTrackInfoWidget #MiddleCenter {
                    </size>
                   </property>
                  </spacer>
+                </item>
+                <item>
+                 <widget class="QWidget" name="menuWrapperOuter" native="true">
+                  <property name="minimumSize">
+                   <size>
+                    <width>16</width>
+                    <height>17</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16</width>
+                    <height>17</height>
+                   </size>
+                  </property>
+                  <layout class="QVBoxLayout" name="menuWrapperLayoutOuter">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>1</number>
+                   </property>
+                   <item>
+                    <widget class="QWidget" name="menuWrapperInner" native="true">
+                     <layout class="QVBoxLayout" name="menuWrapperLayoutInner">
+                      <property name="margin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QToolButton" name="menuButton">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="toolTip">
+                         <string>Menu</string>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QWidget" name="minimizeWrapperOuter" native="true">
