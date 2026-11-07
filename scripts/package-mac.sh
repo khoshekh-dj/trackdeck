@@ -131,6 +131,18 @@ codesign --force --sign - "$APP"
 codesign --verify --strict "$APP"
 
 ln -s /Applications "$OUT/Applications"
-hdiutil create -quiet -volname "$NAME" -srcfolder "$OUT" -ov -format UDZO "$OUT/../$NAME.dmg"
+# hdiutil sometimes fails on CI machines ("Resource busy" while Spotlight or
+# the disk-image helper still holds the folder); wait and try again
+for attempt in 1 2 3 4 5; do
+    if hdiutil create -volname "$NAME" -srcfolder "$OUT" -ov -format UDZO "$OUT/../$NAME.dmg"; then
+        break
+    fi
+    if [ "$attempt" -eq 5 ]; then
+        echo "hdiutil create failed 5 times" >&2
+        exit 1
+    fi
+    echo "hdiutil create failed (attempt $attempt), retrying in $((attempt * 5)) s" >&2
+    sleep $((attempt * 5))
+done
 rm "$OUT/Applications"
 du -sh "$APP" "$OUT/../$NAME.dmg"
