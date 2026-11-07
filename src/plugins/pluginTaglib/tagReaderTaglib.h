@@ -59,6 +59,8 @@ public:
     QMap<QString, QStringList> getTags() const;
     QMap<QString, QStringList> setTags(const QMap<QString, QStringList> &tags);
     QMap<QString, QStringList> updateTags(const QMap<QString, QStringList> &changes);
+    QStringList tagFormats() const;
+    bool savesId3v2() const;
     void setId3v2Version(int version);
 
     QMap<QString, QStringList>

@@ -16,6 +16,14 @@
 #include "tagReaderTaglib.h"
 
 #include <aifffile.h>
+#include <apefile.h>
+#include <asffile.h>
+#include <flacfile.h>
+#include <id3v2tag.h>
+#include <mpcfile.h>
+#include <opusfile.h>
+#include <vorbisfile.h>
+#include <wavpackfile.h>
 #include <aiffproperties.h>
 #include <apeproperties.h>
 #include <flacproperties.h>
@@ -128,6 +136,60 @@ QString NTagReaderTaglib::toUnicode(const TagLib::String &tstr) const
         return m_codec->toUnicode(bytes);
     }
     return TStringToQString(tstr);
+}
+
+static QString id3v2Name(TagLib::ID3v2::Tag *tag)
+{
+    return QString("ID3v2.%1").arg(tag->header()->majorVersion());
+}
+
+QStringList NTagReaderTaglib::tagFormats() const
+{
+    QStringList formats;
+    if (!m_isValid) {
+        return formats;
+    }
+    TagLib::File *f = NTaglib::_tagRef->file();
+    if (auto *file = dynamic_cast<TagLib::MPEG::File *>(f)) {
+        if (file->hasID3v2Tag()) formats << id3v2Name(file->ID3v2Tag());
+        if (file->hasID3v1Tag()) formats << "ID3v1";
+        if (file->hasAPETag()) formats << "APE";
+    } else if (auto *file = dynamic_cast<TagLib::RIFF::AIFF::File *>(f)) {
+        if (file->hasID3v2Tag()) formats << id3v2Name(file->tag());
+    } else if (auto *file = dynamic_cast<TagLib::RIFF::WAV::File *>(f)) {
+        if (file->hasID3v2Tag()) formats << id3v2Name(file->ID3v2Tag());
+        if (file->hasInfoTag()) formats << "RIFF INFO";
+    } else if (auto *file = dynamic_cast<TagLib::FLAC::File *>(f)) {
+        if (file->hasXiphComment()) formats << "Vorbis comments";
+        if (file->hasID3v2Tag()) formats << id3v2Name(file->ID3v2Tag());
+        if (file->hasID3v1Tag()) formats << "ID3v1";
+    } else if (dynamic_cast<TagLib::MP4::File *>(f)) {
+        formats << "MP4 (iTunes)";
+    } else if (dynamic_cast<TagLib::Ogg::Vorbis::File *>(f) || dynamic_cast<TagLib::Ogg::Opus::File *>(f)) {
+        formats << "Vorbis comments";
+    } else if (dynamic_cast<TagLib::ASF::File *>(f)) {
+        formats << "ASF (WMA)";
+    } else if (auto *file = dynamic_cast<TagLib::APE::File *>(f)) {
+        if (file->hasAPETag()) formats << "APE";
+        if (file->hasID3v1Tag()) formats << "ID3v1";
+    } else if (auto *file = dynamic_cast<TagLib::WavPack::File *>(f)) {
+        if (file->hasAPETag()) formats << "APE";
+        if (file->hasID3v1Tag()) formats << "ID3v1";
+    } else if (auto *file = dynamic_cast<TagLib::MPC::File *>(f)) {
+        if (file->hasAPETag()) formats << "APE";
+        if (file->hasID3v1Tag()) formats << "ID3v1";
+    }
+    return formats;
+}
+
+bool NTagReaderTaglib::savesId3v2() const
+{
+    if (!m_isValid) {
+        return false;
+    }
+    TagLib::File *f = NTaglib::_tagRef->file();
+    return dynamic_cast<TagLib::MPEG::File *>(f) || dynamic_cast<TagLib::RIFF::AIFF::File *>(f) ||
+           dynamic_cast<TagLib::RIFF::WAV::File *>(f);
 }
 
 QString NTagReaderTaglib::getTag(QChar ch) const

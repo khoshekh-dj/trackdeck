@@ -120,20 +120,74 @@ NTagEditorDialog::NTagEditorDialog(const QStringList &files, QWidget *parent) : 
     m_hasChanges = false;
 
     ui.tabWidget->setCornerWidget(ui.encodingFrame);
-    int i = 0;
-    foreach (int mib, QTextCodec::availableMibs()) {
-        QString codecName = QTextCodec::codecForMib(mib)->name();
-        ui.encodingComboBox->addItem(codecName, mib);
-        if (codecName == "UTF-8") {
+    // the tag formats go on their own line above the buttons: the tab corner
+    // is too narrow for them and the encoding list together
+    ui.encodingFrame->layout()->removeWidget(ui.tagFormatLabel);
+    ui.verticalLayout->insertWidget(ui.verticalLayout->indexOf(ui.buttonBox), ui.tagFormatLabel);
+    QPalette dim = ui.tagFormatLabel->palette();
+    dim.setColor(QPalette::WindowText, dim.color(QPalette::Disabled, QPalette::WindowText));
+    ui.tagFormatLabel->setPalette(dim);
+    // Only for old tags written in a regional 8-bit encoding (e.g. Russian
+    // tags from Windows-era rippers showing as "Àëèñà"). Modern tags are
+    // Unicode and need nothing, so the list is hidden until asked for.
+    const QList<QPair<QString, QString>> encodings = {
+        {"UTF-8", tr("Automatic (Unicode)")},
+        {"windows-1252", tr("Western European (Windows-1252)")},
+        {"windows-1250", tr("Central European (Windows-1250)")},
+        {"windows-1251", tr("Cyrillic (Windows-1251)")},
+        {"KOI8-R", tr("Cyrillic (KOI8-R)")},
+        {"windows-1253", tr("Greek (Windows-1253)")},
+        {"windows-1254", tr("Turkish (Windows-1254)")},
+        {"windows-1257", tr("Baltic (Windows-1257)")},
+        {"windows-1255", tr("Hebrew (Windows-1255)")},
+        {"windows-1256", tr("Arabic (Windows-1256)")},
+        {"Shift_JIS", tr("Japanese (Shift-JIS)")},
+        {"GBK", tr("Chinese, Simplified (GBK)")},
+        {"Big5", tr("Chinese, Traditional (Big5)")},
+        {"EUC-KR", tr("Korean (EUC-KR)")},
+        {"TIS-620", tr("Thai (TIS-620)")},
+    };
+    QTextCodec *settingsCodec = QTextCodec::codecForName(settingsEncoding.toUtf8());
+    bool settingsListed = false;
+    for (const auto &e : encodings) {
+        QTextCodec *codec = QTextCodec::codecForName(e.first.toUtf8());
+        if (!codec) {
+            continue;
+        }
+        int i = ui.encodingComboBox->count();
+        ui.encodingComboBox->addItem(e.second, QString(codec->name()));
+        if (e.first == "UTF-8") {
             m_encodingUtf8Index = i;
         }
-        if (codecName == settingsEncoding) {
-            ui.encodingComboBox->setCurrentIndex(i);
-            m_encodingPreviousIndex = i;
+        if (settingsCodec && codec->mibEnum() == settingsCodec->mibEnum()) {
             m_encodingSettingsIndex = i;
+            settingsListed = true;
         }
-        ++i;
     }
+    if (settingsCodec && !settingsListed) { // a codec set in an older version
+        m_encodingSettingsIndex = ui.encodingComboBox->count();
+        ui.encodingComboBox->addItem(QString(settingsCodec->name()), QString(settingsCodec->name()));
+    }
+    ui.encodingComboBox->setCurrentIndex(m_encodingSettingsIndex);
+    m_encodingPreviousIndex = m_encodingSettingsIndex;
+    // keep the corner narrow enough for the tabs; the open list is full width
+    ui.encodingComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    ui.encodingComboBox->setMinimumContentsLength(14);
+    ui.encodingComboBox->view()->setMinimumWidth(ui.encodingComboBox->view()->sizeHintForColumn(0) + 24);
+
+    // the list shows straight away only if it's already set to something
+    // other than Unicode
+    auto showEncodingList = [=](bool show) {
+        ui.encodingTagLabel->setVisible(show);
+        ui.encodingComboBox->setVisible(show);
+        ui.garbledButton->setVisible(!show);
+    };
+    showEncodingList(m_encodingSettingsIndex != m_encodingUtf8Index);
+    connect(ui.garbledButton, &QPushButton::clicked, [=] { showEncodingList(true); });
+    ui.encodingComboBox->setToolTip(
+        tr("For old tags written in a regional encoding that show as gibberish.\n"
+           "Pick the language the text should be in; it's shown as a preview,\n"
+           "and \"Edit as UTF-8\" saves it as Unicode."));
     connect(ui.encodingResetButton, &QPushButton::clicked, [=] {
         ui.encodingComboBox->setCurrentIndex(m_encodingUtf8Index);
         on_encodingComboBox_activated(-1);
@@ -375,6 +429,23 @@ bool NTagEditorDialog::writeMultiTrackTags()
     return failed.isEmpty();
 }
 
+void NTagEditorDialog::updateTagFormatLabel()
+{
+    QStringList formats = m_tagReader->tagFormats();
+    QString text = formats.isEmpty() ? tr("No tags yet") : tr("Tags: %1").arg(formats.join(" + "));
+    if (m_tagReader->savesId3v2()) {
+        QString saved = QString("ID3v2.%1").arg(
+            NSettings::instance()->value("TagEditorID3v2Version").toInt() == 4 ? 4 : 3);
+        if (!formats.contains(saved)) {
+            text += "  \u00B7  " + tr("saved as %1").arg(saved);
+        }
+    }
+    ui.tagFormatLabel->setText(text);
+    ui.tagFormatLabel->setToolTip(
+        tr("The tag formats in this file. MP3, AIFF and WAV tags are saved as the ID3v2\n"
+           "version chosen in Preferences \u2192 Track Information \u2192 MP3 tags."));
+}
+
 void NTagEditorDialog::setReadOnlyMode(bool readOnly)
 {
     ui.generalTab->setEnabled(!readOnly);
@@ -410,7 +481,7 @@ void NTagEditorDialog::on_encodingComboBox_activated(int index)
 void NTagEditorDialog::readTags()
 {
     m_hasChanges = false;
-    QString encoding = ui.encodingComboBox->itemText(ui.encodingComboBox->currentIndex());
+    QString encoding = ui.encodingComboBox->currentData().toString();
     m_tagReader->setEncoding(encoding);
 
     QLayout *oldFormLayout = ui.rawTagsScrollArea->widget()->layout();
@@ -423,6 +494,7 @@ void NTagEditorDialog::readTags()
     QRegularExpression widgetNameRegex("Tag");
     m_tagReader->setSource(m_file);
     QMap<QString, QStringList> tags = m_tagReader->getTags();
+    updateTagFormatLabel();
     m_tagReader->setSource(""); // release the file
     QFormLayout *rawTagsFormLayout = new QFormLayout;
     rawTagsFormLayout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
