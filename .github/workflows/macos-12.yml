@@ -1,0 +1,74 @@
+name: macOS 12 build (self-hosted)
+
+# Builds TrackDeck with MacPorts on the maintainer's own macOS 12 Monterey Mac,
+# registered as a self-hosted runner, for Macs too old for the Homebrew builds.
+#
+# SECURITY: this runs on a personal machine, so it must never run for pull
+# requests (a PR could change this file to run anything). Only release tags
+# and manual starts trigger it. Don't add pull_request here.
+on:
+  push:
+    tags: ["trackdeck-v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: macos-12-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build TrackDeck.dmg (macOS 12, MacPorts)
+    # only in the main repository, never in forks
+    if: github.repository == 'khoshekh-dj/trackdeck'
+    runs-on: [self-hosted, macOS, monterey]
+    # if the Mac is off, the job waits in the queue; this caps the build itself
+    timeout-minutes: 120
+    permissions:
+      contents: write # only used on tag pushes, to attach the .dmg to the release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: true
+
+      - name: Tools on this Mac
+        run: |
+          sw_vers
+          uname -m
+          for t in port gh python3 git; do printf '%-8s %s\n' "$t" "$(command -v $t || echo MISSING)"; done
+          # Homebrew in /usr/local can leak into the build; the packaging
+          # step fails if anything links to it, so just note it here
+          [ -d /usr/local/Cellar ] && echo "note: Homebrew present in /usr/local" || true
+
+      - name: Build with MacPorts
+        run: |
+          rm -rf dist
+          scripts/build-mac-macports.sh
+
+      - name: Name artifact
+        id: name
+        run: |
+          f=$(cd dist && ls TrackDeck-*-macOS*.dmg | head -1)
+          echo "file=$f" >> "$GITHUB_OUTPUT"
+          echo "built $f"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.name.outputs.file }}
+          path: |
+            dist/${{ steps.name.outputs.file }}
+            dist/${{ steps.name.outputs.file }}.sha256
+          if-no-files-found: error
+
+      - name: Attach to release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --draft --title "TrackDeck ${GITHUB_REF_NAME#trackdeck-v}" \
+              --notes "Built by GitHub Actions from \`$GITHUB_REF_NAME\`." \
+              || gh release view "$GITHUB_REF_NAME" >/dev/null
+          fi
+          gh release upload "$GITHUB_REF_NAME" "dist/${{ steps.name.outputs.file }}" \
+            "dist/${{ steps.name.outputs.file }}.sha256" --clobber
