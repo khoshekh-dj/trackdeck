@@ -46,7 +46,7 @@ NPlatterWidget::NPlatterWidget(QWidget *parent) : QWidget(parent)
     }
     m_rim = QColor("#B9BDC3");
     m_mat = QColor("#151517");
-    m_dot = QColor("#FF5A1F");
+    m_dot = QColor("#FF8A1A");
     m_label = QColor("#2A2B2F");
 }
 
@@ -225,8 +225,7 @@ void NPlatterWidget::paintEvent(QPaintEvent *)
         if (m_playing) {
             // the row that matches the pitch glows brightest
             qreal off = qAbs(m_pitch - ROW_PITCH[i]);
-            color = lit;
-            color.setAlphaF(off < 0.4 ? 1.0 : 0.75);
+            color = off < 0.4 ? lit.lighter(118) : lit;
         }
         p.setBrush(color);
         qreal step = 360.0 / ROW_DOTS[i];

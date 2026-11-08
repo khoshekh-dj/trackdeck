@@ -240,8 +240,9 @@ void NPlaybackEngineGStreamer::reopenAudioOutput()
     gst_element_set_state(m_playbin, GST_STATE_PAUSED);
     gst_element_get_state(m_playbin, NULL, NULL, 2 * GST_SECOND); // wait for preroll
     if (havePos && posNsec > 0) {
-        gst_element_seek_simple(m_playbin, GST_FORMAT_TIME,
-                                GstSeekFlags(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE), posNsec);
+        gst_element_seek(m_playbin, m_speed, GST_FORMAT_TIME,
+                         GstSeekFlags(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE),
+                         GST_SEEK_TYPE_SET, posNsec, GST_SEEK_TYPE_NONE, GST_CLOCK_TIME_NONE);
         gst_element_get_state(m_playbin, NULL, NULL, 2 * GST_SECOND);
     }
     if (current == GST_STATE_PLAYING) {

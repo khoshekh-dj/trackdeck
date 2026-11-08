@@ -54,7 +54,7 @@
 #platterWidget {
 	qproperty-rim_color: #B4B8BE;
 	qproperty-mat_color: #141416;
-	qproperty-dot_color: #FF5A1F;
+	qproperty-dot_color: #FF8A1A;
 	qproperty-label_color: #2A2B2F;
 }
 /* the target light: lit while playing (set by the script) */
