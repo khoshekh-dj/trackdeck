@@ -560,7 +560,7 @@ void NPlaybackEngineGStreamer::checkStatus()
                 m_position = (qreal)gstPos / m_durationNsec;
                 emit positionChanged(m_position);
             }
-            emit tick(gstPos / NSEC_IN_MSEC * m_speed);
+            emit tick(gstPos / NSEC_IN_MSEC); // the position in the track, at any speed
         }
 
         if (m_positionPostponed || m_speedPostponed) {
