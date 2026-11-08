@@ -3,8 +3,8 @@ mac:SKIN_DEST_DIR = $$PROJECT_DIR/$${APP_NAME}.app/Contents/MacOS/skins
 win32:SKIN_DEST_DIR = $$PROJECT_DIR/Skins
 mkpath($$SKIN_DEST_DIR) # qmake builtin: works on every platform/shell
 
-unix:SKINS =  booth khoshekh metro mixer modern retro silver slim
-win32:SKINS = Booth Khoshekh Metro Mixer Modern Retro Silver Slim
+unix:SKINS =  booth khoshekh metro mixer modern retro silver slim turntable
+win32:SKINS = Booth Khoshekh Metro Mixer Modern Retro Silver Slim Turntable
 for(skin, SKINS) {
     _depends = $$SRC_DIR/skins/$$lower($${skin})
     _target = $$SKIN_DEST_DIR/$${skin}.nzs

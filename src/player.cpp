@@ -50,6 +50,7 @@
 #include "utils.h"
 #include "volumeSlider.h"
 #include "levelMeter.h"
+#include "platterWidget.h"
 #include "spectrumWidget.h"
 #include "waveformSlider.h"
 
@@ -147,6 +148,7 @@ NPlayer::NPlayer()
     m_waveformSlider->setLayout(trackInfoLayout);
     m_spectrumWidget = m_mainWindow->findChild<NSpectrumWidget *>("spectrumWidget"); // optional
     m_levelMeters = m_mainWindow->findChildren<NLevelMeter *>(); // optional
+    m_platterWidget = m_mainWindow->findChild<NPlatterWidget *>("platterWidget"); // optional
 
 #ifdef Q_OS_WIN
     NW7TaskBar::instance()->setWindow(m_mainWindow);
@@ -733,6 +735,9 @@ void NPlayer::loadCoverArt(const QString &file)
     } else {
         m_coverWidget->show();
         m_coverWidget->setPixmap(QPixmap::fromImage(image));
+    }
+    if (m_platterWidget) { // a skin's turntable shows the cover as the record label
+        m_platterWidget->setPixmap(image.isNull() ? QPixmap() : QPixmap::fromImage(image));
     }
     m_currentCover = image;
     updateAmbientImage();
