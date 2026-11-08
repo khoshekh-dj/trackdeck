@@ -49,7 +49,8 @@ private:
     QList<SpectrumFrame> m_spectrumQueue;
     void queueSpectrum(GstMessage *msg);
     void releaseSpectrum();
-    void clearSpectrum();
+    void clearAnalyserQueues();
+    bool runningTime(GstClockTime *now) const;
 
     // live per-channel levels for skin meters, queued the same way
     struct LevelFrame

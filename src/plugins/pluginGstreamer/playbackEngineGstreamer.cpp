@@ -290,7 +290,7 @@ bool NPlaybackEngineGStreamer::gstSetFile(const QString &file, int context, bool
 
 void NPlaybackEngineGStreamer::setMedia(const QString &file, int context)
 {
-    clearSpectrum();
+    clearAnalyserQueues();
     m_crossfading = false;
     m_position = 0.0;
     m_nextMediaRequestBlock = true;
@@ -349,7 +349,7 @@ qreal NPlaybackEngineGStreamer::volume() const
 
 void NPlaybackEngineGStreamer::setPosition(qreal pos)
 {
-    clearSpectrum();
+    clearAnalyserQueues();
     if (!hasMedia() || pos < 0.0 || pos > 1.0) {
         return;
     }
@@ -368,7 +368,7 @@ void NPlaybackEngineGStreamer::setPosition(qreal pos)
 
 void NPlaybackEngineGStreamer::jump(qint64 msec)
 {
-    clearSpectrum();
+    clearAnalyserQueues();
     if (!hasMedia()) {
         return;
     }
@@ -407,7 +407,7 @@ void NPlaybackEngineGStreamer::play()
 
 void NPlaybackEngineGStreamer::pause()
 {
-    clearSpectrum();
+    clearAnalyserQueues();
     if (!hasMedia()) {
         return;
     }
@@ -425,7 +425,7 @@ void NPlaybackEngineGStreamer::pause()
 
 void NPlaybackEngineGStreamer::stop()
 {
-    clearSpectrum();
+    clearAnalyserQueues();
     m_crossfading = false;
     m_nextMediaRequestBlock = true;
     gst_element_set_state(m_playbin, GST_STATE_NULL);
@@ -603,12 +603,19 @@ bool NPlaybackEngineGStreamer::_nextMediaRequestBlocked()
     return m_nextMediaRequestBlock;
 }
 
+// Turns an analyser's messages on or off; false if the element is missing.
+static bool _setPostMessages(GstElement *element, bool enabled)
+{
+    if (!element) {
+        return false;
+    }
+    g_object_set(element, "post-messages", enabled ? TRUE : FALSE, NULL);
+    return enabled;
+}
+
 void NPlaybackEngineGStreamer::setSpectrumEnabled(bool enabled)
 {
-    m_spectrumEnabled = enabled && m_spectrum;
-    if (m_spectrum) {
-        g_object_set(m_spectrum, "post-messages", m_spectrumEnabled ? TRUE : FALSE, NULL);
-    }
+    m_spectrumEnabled = _setPostMessages(m_spectrum, enabled);
     updateBusPollInterval();
     if (!m_spectrumEnabled) {
         m_spectrumQueue.clear();
@@ -618,10 +625,7 @@ void NPlaybackEngineGStreamer::setSpectrumEnabled(bool enabled)
 
 void NPlaybackEngineGStreamer::setLevelsEnabled(bool enabled)
 {
-    m_levelsEnabled = enabled && m_level;
-    if (m_level) {
-        g_object_set(m_level, "post-messages", m_levelsEnabled ? TRUE : FALSE, NULL);
-    }
+    m_levelsEnabled = _setPostMessages(m_level, enabled);
     updateBusPollInterval();
     if (!m_levelsEnabled) {
         m_levelQueue.clear();
@@ -637,14 +641,60 @@ void NPlaybackEngineGStreamer::updateBusPollInterval()
 
 void NPlaybackEngineGStreamer::setSpectrumFrameRate(int framesPerSecond)
 {
+    guint64 interval = GST_SECOND / qBound(15, framesPerSecond, 60);
     if (m_spectrum) {
-        g_object_set(m_spectrum, "interval",
-                     (guint64)(GST_SECOND / qBound(15, framesPerSecond, 60)), NULL);
+        g_object_set(m_spectrum, "interval", interval, NULL);
     }
     if (m_level) {
-        g_object_set(m_level, "interval",
-                     (guint64)(GST_SECOND / qBound(15, framesPerSecond, 60)), NULL);
+        g_object_set(m_level, "interval", interval, NULL);
     }
+}
+
+// Analyser frames (spectrum, levels) are queued when the element measures
+// them and released when their audio is heard.
+
+// when a frame's audio is heard: the middle of the measured stretch
+static GstClockTime _frameDue(const GstStructure *s)
+{
+    GstClockTime runningTime = 0, duration = 0;
+    gst_structure_get_clock_time(s, "running-time", &runningTime);
+    gst_structure_get_clock_time(s, "duration", &duration);
+    return runningTime + duration / 2;
+}
+
+template <typename Frame>
+static void _enqueue(QList<Frame> &queue, const Frame &frame)
+{
+    queue.append(frame);
+    if (queue.size() > 120) { // ~2 s; something is off, don't grow forever
+        queue.removeFirst();
+    }
+}
+
+// How many frames at the front of the queue are due. After a seek the
+// running time restarts, so frames from far ahead are dropped.
+template <typename Frame>
+static int _dueFrames(QList<Frame> &queue, GstClockTime now)
+{
+    int due = 0;
+    while (due < queue.size() && queue.at(due).due <= now) {
+        ++due;
+    }
+    if (due == 0 && !queue.isEmpty() && queue.first().due > now + 2 * GST_SECOND) {
+        queue.clear();
+    }
+    return due;
+}
+
+bool NPlaybackEngineGStreamer::runningTime(GstClockTime *now) const
+{
+    GstClock *clock = gst_element_get_clock(m_playbin);
+    if (!clock) {
+        return false;
+    }
+    *now = gst_clock_get_time(clock) - gst_element_get_base_time(m_playbin);
+    gst_object_unref(clock);
+    return true;
 }
 
 // the level element posts its values as a GValueArray (or, in newer
@@ -683,61 +733,41 @@ void NPlaybackEngineGStreamer::queueLevels(GstMessage *msg)
     if (!s || !gst_structure_has_name(s, "level")) {
         return;
     }
-    GstClockTime runningTime = 0, duration = 0;
-    gst_structure_get_clock_time(s, "running-time", &runningTime);
-    gst_structure_get_clock_time(s, "duration", &duration);
-
     LevelFrame frame;
-    frame.due = runningTime + duration / 2;
+    frame.due = _frameDue(s);
     frame.rms = _levelValues(s, "rms");
     frame.peak = _levelValues(s, "peak");
     if (frame.rms.isEmpty() || frame.rms.size() != frame.peak.size()) {
         return;
     }
-    m_levelQueue.append(frame);
-    if (m_levelQueue.size() > 120) {
-        m_levelQueue.removeFirst();
-    }
+    _enqueue(m_levelQueue, frame);
 }
 
 void NPlaybackEngineGStreamer::releaseLevels()
 {
-    if (!m_levelsEnabled || m_levelQueue.isEmpty()) {
+    GstClockTime now;
+    if (!m_levelsEnabled || m_levelQueue.isEmpty() || !runningTime(&now)) {
         return;
     }
-    GstClock *clock = gst_element_get_clock(m_playbin);
-    if (!clock) {
+    int due = _dueFrames(m_levelQueue, now);
+    if (due == 0) {
         return;
     }
-    GstClockTime now = gst_clock_get_time(clock) - gst_element_get_base_time(m_playbin);
-    gst_object_unref(clock);
-
     // the newest due frame, but with the loudest peak of the skipped ones
     // so short transients still reach the meter
-    int last = -1;
-    QVector<float> peak;
-    for (int i = 0; i < m_levelQueue.size(); ++i) {
-        if (m_levelQueue.at(i).due > now) {
-            break;
-        }
-        last = i;
+    QVector<float> peak = m_levelQueue.at(0).peak;
+    for (int i = 1; i < due; ++i) {
         const QVector<float> &p = m_levelQueue.at(i).peak;
-        if (peak.size() != p.size()) {
+        if (p.size() != peak.size()) {
             peak = p;
-        } else {
-            for (int c = 0; c < p.size(); ++c) {
-                peak[c] = qMax(peak.at(c), p.at(c));
-            }
+            continue;
+        }
+        for (int c = 0; c < p.size(); ++c) {
+            peak[c] = qMax(peak.at(c), p.at(c));
         }
     }
-    if (last < 0) {
-        if (m_levelQueue.first().due > now + 2 * GST_SECOND) {
-            m_levelQueue.clear();
-        }
-        return;
-    }
-    QVector<float> rms = m_levelQueue.at(last).rms;
-    m_levelQueue.erase(m_levelQueue.begin(), m_levelQueue.begin() + last + 1);
+    QVector<float> rms = m_levelQueue.at(due - 1).rms;
+    m_levelQueue.erase(m_levelQueue.begin(), m_levelQueue.begin() + due);
     emit levelsChanged(rms, peak);
 }
 
@@ -755,12 +785,8 @@ void NPlaybackEngineGStreamer::queueSpectrum(GstMessage *msg)
         return;
     }
 
-    GstClockTime runningTime = 0, duration = 0;
-    gst_structure_get_clock_time(s, "running-time", &runningTime);
-    gst_structure_get_clock_time(s, "duration", &duration);
-
     SpectrumFrame frame;
-    frame.due = runningTime + duration / 2; // the middle of the measured stretch
+    frame.due = _frameDue(s);
     guint n = gst_value_list_get_size(list);
     frame.magnitudes.resize(n);
     for (guint i = 0; i < n; ++i) {
@@ -775,47 +801,26 @@ void NPlaybackEngineGStreamer::queueSpectrum(GstMessage *msg)
         }
         gst_object_unref(pad);
     }
-
-    m_spectrumQueue.append(frame);
-    if (m_spectrumQueue.size() > 120) { // ~2 s; something is off, don't grow forever
-        m_spectrumQueue.removeFirst();
-    }
+    _enqueue(m_spectrumQueue, frame);
 }
 
 void NPlaybackEngineGStreamer::releaseSpectrum()
 {
-    if (!m_spectrumEnabled || m_spectrumQueue.isEmpty()) {
+    GstClockTime now;
+    if (!m_spectrumEnabled || m_spectrumQueue.isEmpty() || !runningTime(&now)) {
         return;
     }
-    GstClock *clock = gst_element_get_clock(m_playbin);
-    if (!clock) {
-        return;
-    }
-    GstClockTime now = gst_clock_get_time(clock) - gst_element_get_base_time(m_playbin);
-    gst_object_unref(clock);
-
     // emit the newest frame that is due; older due frames are skipped
-    int last = -1;
-    for (int i = 0; i < m_spectrumQueue.size(); ++i) {
-        if (m_spectrumQueue.at(i).due <= now) {
-            last = i;
-        } else {
-            break;
-        }
-    }
-    if (last < 0) {
-        // after a seek the running time restarts; drop frames from far ahead
-        if (m_spectrumQueue.first().due > now + 2 * GST_SECOND) {
-            m_spectrumQueue.clear();
-        }
+    int due = _dueFrames(m_spectrumQueue, now);
+    if (due == 0) {
         return;
     }
-    QVector<float> magnitudes = m_spectrumQueue.at(last).magnitudes;
-    m_spectrumQueue.erase(m_spectrumQueue.begin(), m_spectrumQueue.begin() + last + 1);
+    QVector<float> magnitudes = m_spectrumQueue.at(due - 1).magnitudes;
+    m_spectrumQueue.erase(m_spectrumQueue.begin(), m_spectrumQueue.begin() + due);
     emit spectrumChanged(magnitudes, m_spectrumRate > 0 ? m_spectrumRate : 44100);
 }
 
-void NPlaybackEngineGStreamer::clearSpectrum()
+void NPlaybackEngineGStreamer::clearAnalyserQueues()
 {
     m_spectrumQueue.clear();
     m_levelQueue.clear();
