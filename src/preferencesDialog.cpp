@@ -290,6 +290,9 @@ NPreferencesDialog::NPreferencesDialog(NPlayer *player, QWidget *parent) : QDial
     NUtils::fillEncodingComboBox(ui.encodingTrackInfoComboBox, "UTF-8");
     ui.id3v2VersionComboBox->addItem(tr("ID3v2.3 (most compatible)"), 3);
     ui.id3v2VersionComboBox->addItem(tr("ID3v2.4"), 4);
+    ui.keyNotationComboBox->addItem(tr("As tagged"), "tag");
+    ui.keyNotationComboBox->addItem(tr("Camelot (8A, 8B)"), "camelot");
+    ui.keyNotationComboBox->addItem(tr("Musical (Am, C)"), "musical");
 }
 
 void NPreferencesDialog::showEvent(QShowEvent *event)
@@ -690,6 +693,8 @@ void NPreferencesDialog::loadSettings()
     ui.id3v2VersionComboBox->setCurrentIndex(qMax(
         0, ui.id3v2VersionComboBox->findData(
                NSettings::instance()->value("TagEditorID3v2Version").toInt())));
+    ui.keyNotationComboBox->setCurrentIndex(qMax(
+        0, ui.keyNotationComboBox->findData(NSettings::instance()->value("KeyNotation").toString())));
     // << ID3v2 version
 
     // track info encoding >>
@@ -875,6 +880,8 @@ void NPreferencesDialog::saveSettings()
     // ID3v2 version >>
     NSettings::instance()->setValue("TagEditorID3v2Version",
                                     ui.id3v2VersionComboBox->currentData().toInt());
+    NSettings::instance()->setValue("KeyNotation",
+                                    ui.keyNotationComboBox->currentData().toString());
     // << ID3v2 version
 
     // tooltip offset >>

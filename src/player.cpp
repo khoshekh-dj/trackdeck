@@ -522,6 +522,7 @@ void NPlayer::loadSettings()
     }
 #endif
 
+    m_keyNotation = m_settings->value("KeyNotation").toString();
     m_playbackEngine->setVolume(m_settings->value("Volume").toFloat());
     m_volumeSlider->setValue(m_settings->value("Volume").toFloat());
     applyVisualiserSettings();
@@ -584,6 +585,13 @@ void NPlayer::applySettings()
     m_trackInfoWidget->updateFileLabels(m_playbackEngine->currentMedia());
     m_playlistWidget->setColumnsMode(m_settings->value("PlaylistColumns").toBool());
     m_playlistWidget->processVisibleItems();
+    QString keyNotation = m_settings->value("KeyNotation").toString();
+    if (keyNotation != m_keyNotation) { // keys are shown differently now
+        m_keyNotation = keyNotation;
+        m_playlistWidget->invalidateItemData();
+        m_trackInfoWidget->updateFileLabels(m_playbackEngine->currentMedia());
+        emit trackInfoChanged();
+    }
     m_actionManager->saveSettings();
 }
 

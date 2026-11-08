@@ -60,6 +60,7 @@ private:
     NSpectrumWidget *m_spectrumWidget;
     QList<NLevelMeter *> m_levelMeters;
     NPlatterWidget *m_platterWidget;
+    QString m_keyNotation; // as last applied, to notice changes
     NPreferencesDialog *m_preferencesDialog;
     NAboutDialog *m_aboutDialog;
     NVolumeSlider *m_volumeSlider;

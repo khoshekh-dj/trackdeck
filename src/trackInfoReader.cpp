@@ -15,6 +15,7 @@
 
 #include "trackInfoReader.h"
 #include "bpmCache.h"
+#include "utils.h"
 #include "pluginLoader.h"
 #include "settings.h"
 
@@ -133,6 +134,13 @@ QString NTrackInfoReader::getInfo(QChar ch) const
                 return NBpmCache::format(bpm) + "*"; // detected by TrackDeck, not from the tag
             }
             return "";
+        }
+        case 'k': { // musical key, in the notation chosen in Preferences
+            if (!m_fileInfo.filePath().isEmpty()) {
+                m_reader->setSource(m_fileInfo.filePath());
+            }
+            return NUtils::formatKey(m_reader->getTag(ch).trimmed(),
+                                     NSettings::instance()->value("KeyNotation").toString());
         }
         default:
             // the tag reader plugin holds a single open file shared by all

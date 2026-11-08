@@ -73,6 +73,7 @@ NSettings::NSettings(QObject *parent)
     initValue("Shortcuts/SpeedDecreaseAction", QStringList() << "[");
     initValue("Shortcuts/SpeedResetAction", QStringList() << "Backspace");
     initValue("SpeedStep", 0.01);
+    initValue("KeyNotation", "tag"); // tag (as written), camelot or musical
 
     /*
     initValue("Shortcuts/PitchIncreaseAction", QStringList() << "}");
