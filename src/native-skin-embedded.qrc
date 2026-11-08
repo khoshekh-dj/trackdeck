@@ -2,6 +2,7 @@
   <qresource>
     <file alias="ChangeLog">../ChangeLog</file>
     <file alias="THANKS">../THANKS</file>
+    <file>skins/common.js</file>
     <file>skins/native/id.txt</file>
     <file>skins/native/script.js</file>
     <file>skins/native/form.ui</file>

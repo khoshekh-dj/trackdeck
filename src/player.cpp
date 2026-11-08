@@ -116,6 +116,14 @@ NPlayer::NPlayer()
 #else
     QString scriptFileName(":skins/native/script.js");
 #endif
+#ifndef _N_NO_SKINS_
+    // shared skin code (window behaviour, accent colours) used by
+    // TrackDeck's skins; runs first so the skin's script can use it
+    QFile commonFile(":skins/common.js");
+    commonFile.open(QIODevice::ReadOnly);
+    m_scriptEngine->evaluate(commonFile.readAll(), commonFile.fileName());
+    commonFile.close();
+#endif
     QFile scriptFile(scriptFileName);
     scriptFile.open(QIODevice::ReadOnly);
     m_scriptEngine->evaluate(scriptFile.readAll(), scriptFileName);

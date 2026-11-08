@@ -21,79 +21,25 @@ function Main()
         this.playing = false;
         Ui.playlistWidget.alternatingRowColors = true;
 
-        Ui.titleWidget.enableDoubleClick();
-        Ui.titleWidget.doubleClicked.connect(Ui.mainWindow.toggleMaximize);
-
-        PlaybackEngine["stateChanged(N::PlaybackState)"].connect(this, "on_stateChanged");
-        PlaybackEngine["mediaChanged(const QString &, int)"].connect(this, "on_mediaChanged");
-        Player["trackInfoChanged()"].connect(this, "updateTrackLabels"); // e.g. BPM detected
         PlaybackEngine["tick(qint64)"].connect(this, "on_tick");
-        Settings["valueChanged(QString,QVariant)"].connect(this, "on_settingChanged");
 
-        Ui.mainWindow["newTitle(const QString &)"].connect(this, "setTitle");
-        Ui.mainWindow["fullScreenEnabled(bool)"].connect(this, "on_fullScreenEnabled");
-        Ui.mainWindow["showPlaybackControlsEnabled(bool)"].connect(this, "on_showPlaybackControlsEnabled");
-        Ui.mainWindow["maximizeEnabled(bool)"].connect(this, "on_maximizeEnabled");
-        Ui.mainWindow.resized.connect(this, "on_resized");
-
-        if (!Settings.value("TurntableSkin/Splitter")) {
-            Settings.setValue("TurntableSkin/Splitter", [360, 240]);
-        }
-        if (!Settings.value("TurntableSkin/SplitterFullScreen")) {
-            Settings.setValue("TurntableSkin/SplitterFullScreen", [999999, 0]);
-        }
-        Ui.splitter["splitterMoved(int, int)"].connect(this, "on_splitterMoved");
+        SkinCommon.setup(this, {
+            settings: "TurntableSkin",
+            splitter: [360, 240],
+            accent: { base: "#D7262B" }
+        });
         Ui.pitchSlider["valueChanged(int)"].connect(this, "on_pitchMoved");
-
-        Ui.mainWindow.windowFlags = (Ui.mainWindow.windowFlags | Qt.FramelessWindowHint | Qt.WindowCloseButtonHint) ^ (Qt.WindowTitleHint | Qt.Dialog);
-
-        if (Q_WS == "mac") {
-            Ui.playlistWidget.setAttribute(Qt.WA_MacShowFocusRect, false);
-            Ui.sizeGrip.setParent(Ui.borderWidget);
-        } else {
-            Ui.sizeGrip.hide();
-            Ui.mainWindow.setSizeGripEnabled(true);
-        }
-
-        // window buttons go where the platform expects them
-        if (Q_WS != "mac" && WS_WM_BUTTON_DIRECTION != "left") {
-            Ui.titleWidget.layout().addWidget(Ui.minimizeButton);
-            Ui.titleWidget.layout().addWidget(Ui.closeButton);
-        }
-
-        this.marginsBkp_ = Ui.borderWidget.layout().contentsMargins();
-
-        if (WS_WM_TILING) {
-            Ui.titleWidget.setVisible(false);
-        }
     } catch (err) {
         print("QtScript: " + err);
     }
 }
 
+SkinCommon.install(Main);
+
 Main.prototype.afterShow = function()
 {
-    Ui.splitter.setSizes(Settings.value("TurntableSkin/Splitter"));
-    Ui.menuButton["clicked()"].connect(this, "showMenu");
     this.showSpeed(PlaybackEngine.speed());
-    this.updateTrackLabels();
-    this.on_resized();
-
-    // the skin's stylesheet, before accent/ambient changes are applied to it
-    this.baseStyleSheet = Ui.mainWindow.styleSheet;
-    this.applyStyle();
-}
-
-Main.prototype.showMenu = function()
-{
-    var menuPos = Ui.menuButton.pos;
-    menuPos.y += Ui.menuButton.height;
-    Player.showContextMenu(menuPos);
-}
-
-Main.prototype.on_mediaChanged = function(file, id)
-{
-    this.updateTrackLabels();
+    SkinCommon.methods.afterShow.call(this);
 }
 
 Main.prototype.updateTrackLabels = function()
@@ -234,120 +180,4 @@ Main.prototype.updatePlayButton = function()
         Ui.targetLight.styleSheet = "";
     }
     Ui.platterWidget.setPlaying(this.playing);
-}
-
-Main.prototype.on_resized = function()
-{
-    if (Q_WS == "mac") {
-        Ui.sizeGrip.move(Ui.sizeGrip.parentWidget().width - Ui.sizeGrip.width - 3,
-                         Ui.sizeGrip.parentWidget().height - Ui.sizeGrip.height - 3);
-        Ui.sizeGrip.raise();
-    }
-}
-
-Main.prototype.on_splitterMoved = function(pos, index)
-{
-    if (Ui.mainWindow.isFullSceen()) {
-        Settings.setValue("TurntableSkin/SplitterFullScreen", Ui.splitter.sizes());
-    } else {
-        Settings.setValue("TurntableSkin/Splitter", Ui.splitter.sizes());
-    }
-}
-
-Main.prototype.setTitle = function(title)
-{
-    Ui.titleLabel.text = title;
-    Ui.titleLabel.toolTip = title;
-}
-
-Main.prototype.on_fullScreenEnabled = function(enabled)
-{
-    if (enabled) {
-        Ui.splitter.setSizes(Settings.value("TurntableSkin/SplitterFullScreen"));
-    } else {
-        Ui.splitter.setSizes(Settings.value("TurntableSkin/Splitter"));
-    }
-
-    if (Settings.value("ShowPlaybackControls")) {
-        Ui.controlsContainer.setVisible(!enabled);
-    }
-    Ui.titleWidget.setVisible(!enabled);
-    this.setBorderVisible(!enabled);
-}
-
-Main.prototype.on_showPlaybackControlsEnabled = function(enabled)
-{
-    if (!Ui.mainWindow.isFullSceen()) {
-        Ui.controlsContainer.setVisible(enabled);
-    }
-}
-
-Main.prototype.on_maximizeEnabled = function(enabled)
-{
-    this.setBorderVisible(!enabled);
-}
-
-Main.prototype.setBorderVisible = function(enabled)
-{
-    if (!enabled) {
-        Ui.borderWidget.layout().setContentsMargins(0, 0, 0, 0);
-    } else {
-        Ui.borderWidget.layout().setContentsMargins(this.marginsBkp_);
-    }
-}
-
-// --- accent colour & album-art background ----------------------------------
-
-function hexToRgb(hex)
-{
-    hex = String(hex).replace("#", "");
-    return [parseInt(hex.substr(0, 2), 16), parseInt(hex.substr(2, 2), 16), parseInt(hex.substr(4, 2), 16)];
-}
-
-function rgbToHex(rgb)
-{
-    var s = "#";
-    for (var i = 0; i < 3; ++i) {
-        var v = Math.max(0, Math.min(255, Math.round(rgb[i]))).toString(16).toUpperCase();
-        s += (v.length < 2 ? "0" : "") + v;
-    }
-    return s;
-}
-
-// t > 0 mixes towards white, t < 0 towards black
-function shade(rgb, t)
-{
-    var target = t > 0 ? 255 : 0;
-    var k = Math.abs(t);
-    return [rgb[0] + (target - rgb[0]) * k, rgb[1] + (target - rgb[1]) * k, rgb[2] + (target - rgb[2]) * k];
-}
-
-function replaceAll(text, from, to)
-{
-    return text.split(from).join(to);
-}
-
-Main.prototype.applyStyle = function()
-{
-    if (this.baseStyleSheet === undefined) {
-        return;
-    }
-    var sheet = this.baseStyleSheet;
-
-    // the skin's accent is red; swap in the chosen accent colour
-    var accent = String(Settings.value("AccentColor") || "#D7262B");
-    if (/^#[0-9A-Fa-f]{6}$/.test(accent) && accent.toUpperCase() != "#D7262B") {
-        var rgb = hexToRgb(accent);
-        sheet = replaceAll(sheet, "#D7262B", rgbToHex(rgb));
-        sheet = replaceAll(sheet, "rgba(215, 38, 43,",
-                           "rgba(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ",");
-    }
-    Ui.mainWindow.styleSheet = sheet;
-}
-
-Main.prototype.on_settingChanged = function(key, value)
-{
-    if (key == "AccentColor") {
-        this.applyStyle();
-    }
 }
