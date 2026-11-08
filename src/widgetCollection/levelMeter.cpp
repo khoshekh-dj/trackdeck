@@ -19,9 +19,14 @@
 #include <QPainter>
 #include <QTimer>
 
-// Summed spectrum power between these maps onto the meter's height
-static const double FLOOR_DB = -42;
+// dBFS between these maps onto the meter's height
+static const double FLOOR_DB = -40;
 static const double CEILING_DB = 0;
+
+static float _scale(float db)
+{
+    return (float)qBound(0.0, (db - FLOOR_DB) / (CEILING_DB - FLOOR_DB), 1.0);
+}
 static const double FALL_PER_SEC = 1.2;  // of the full height
 static const double PEAK_HOLD_SEC = 0.8;
 static const double PEAK_FALL_PER_SEC = 0.6;
@@ -38,7 +43,9 @@ NLevelMeter::NLevelMeter(QWidget *parent) : QWidget(parent)
     m_lastTick = 0;
     m_lastFrame = -FRAME_TIMEOUT_MSEC;
 
+    m_channel = 0;
     m_target = 0;
+    m_peakTarget = 0;
     m_level = 0;
     m_peak = 0;
     m_peakHold = 0;
@@ -111,19 +118,15 @@ QSize NLevelMeter::minimumSizeHint() const
     return QSize(6, 40);
 }
 
-void NLevelMeter::setSpectrum(const QVector<float> &magnitudes, int sampleRate)
+void NLevelMeter::setLevels(const QVector<float> &rms, const QVector<float> &peak)
 {
-    Q_UNUSED(sampleRate);
-    if (!isVisible() || magnitudes.isEmpty()) {
+    if (!isVisible() || rms.isEmpty() || peak.size() != rms.size()) {
         return;
     }
-    // each bin is a level in dB; add up their power for the overall level
-    double power = 0;
-    for (int i = 0; i < magnitudes.size(); ++i) {
-        power += std::pow(10.0, magnitudes.at(i) / 10.0);
-    }
-    double db = power > 0 ? 10.0 * std::log10(power) : -200;
-    m_target = (float)qBound(0.0, (db - FLOOR_DB) / (CEILING_DB - FLOOR_DB), 1.0);
+    // a mono track shows the same level on both meters
+    int c = qMin(m_channel, rms.size() - 1);
+    m_target = _scale(rms.at(c));
+    m_peakTarget = qMax(m_peakTarget, _scale(peak.at(c)));
 
     m_lastFrame = m_clock.elapsed();
     if (!m_timer->isActive()) {
@@ -135,6 +138,7 @@ void NLevelMeter::setSpectrum(const QVector<float> &magnitudes, int sampleRate)
 void NLevelMeter::clear()
 {
     m_target = 0;
+    m_peakTarget = 0;
     m_lastFrame = -FRAME_TIMEOUT_MSEC;
 }
 
@@ -146,6 +150,7 @@ void NLevelMeter::tick()
 
     if (now - m_lastFrame > FRAME_TIMEOUT_MSEC) {
         m_target = 0;
+        m_peakTarget = 0;
     }
     // fast attack, steady fall, like a hardware meter
     if (m_target > m_level) {
@@ -153,8 +158,10 @@ void NLevelMeter::tick()
     } else {
         m_level = qMax(m_target, m_level - (float)(FALL_PER_SEC * dt));
     }
-    if (m_level >= m_peak) {
-        m_peak = m_level;
+    float peakNow = qMax(m_level, m_peakTarget);
+    m_peakTarget = 0; // taken; the next frames bring new peaks
+    if (peakNow >= m_peak) {
+        m_peak = peakNow;
         m_peakHold = PEAK_HOLD_SEC;
     } else if (m_peakHold > 0) {
         m_peakHold -= dt;

@@ -67,11 +67,11 @@
 	font-weight: 700;
 	letter-spacing: 1px;
 }
-#levelMeter {
+#levelMeterLeft, #levelMeterRight {
 	qproperty-segments: 20;
 	qproperty-segment_gap: 2;
 	qproperty-mid_from: 13;
-	qproperty-high_from: 17;
+	qproperty-high_from: 18;
 	qproperty-low_color: #3DDC84;
 	qproperty-mid_color: #FFB020;
 	qproperty-high_color: #FF3B3B;
@@ -564,13 +564,29 @@ QToolTip {
 <property name="topMargin"><number>0</number></property>
 <property name="rightMargin"><number>0</number></property>
 <property name="bottomMargin"><number>0</number></property>
-      <item><widget class="NLevelMeter" name="levelMeter" native="true">
-       <property name="minimumSize"><size><width>12</width><height>60</height></size></property>
-       <property name="maximumSize"><size><width>12</width><height>16777215</height></size></property>
-       <property name="toolTip"><string>Level (both channels, before the fader)</string></property>
-      </widget></item>
+      <item>
+       <layout class="QHBoxLayout" name="meterPair">
+        <property name="spacing"><number>3</number></property>
+<property name="leftMargin"><number>0</number></property>
+<property name="topMargin"><number>0</number></property>
+<property name="rightMargin"><number>0</number></property>
+<property name="bottomMargin"><number>0</number></property>
+        <item><widget class="NLevelMeter" name="levelMeterLeft" native="true">
+ <property name="minimumSize"><size><width>10</width><height>60</height></size></property>
+ <property name="maximumSize"><size><width>10</width><height>16777215</height></size></property>
+ <property name="channel"><number>0</number></property>
+ <property name="toolTip"><string>Left channel level, before the fader</string></property>
+</widget></item>
+        <item><widget class="NLevelMeter" name="levelMeterRight" native="true">
+ <property name="minimumSize"><size><width>10</width><height>60</height></size></property>
+ <property name="maximumSize"><size><width>10</width><height>16777215</height></size></property>
+ <property name="channel"><number>1</number></property>
+ <property name="toolTip"><string>Right channel level, before the fader</string></property>
+</widget></item>
+       </layout>
+      </item>
       <item><widget class="QLabel" name="levelCaption">
- <property name="text"><string>LEVEL</string></property>
+ <property name="text"><string>L    R</string></property>
  <property name="alignment"><set>Qt::AlignCenter</set></property>
 </widget></item>
      </layout>

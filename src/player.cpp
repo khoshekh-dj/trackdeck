@@ -146,7 +146,7 @@ NPlayer::NPlayer()
     m_waveformSlider = m_mainWindow->findChild<NWaveformSlider *>("waveformSlider");
     m_waveformSlider->setLayout(trackInfoLayout);
     m_spectrumWidget = m_mainWindow->findChild<NSpectrumWidget *>("spectrumWidget"); // optional
-    m_levelMeter = m_mainWindow->findChild<NLevelMeter *>("levelMeter");             // optional
+    m_levelMeters = m_mainWindow->findChildren<NLevelMeter *>(); // optional
 
 #ifdef Q_OS_WIN
     NW7TaskBar::instance()->setWindow(m_mainWindow);
@@ -247,9 +247,18 @@ void NPlayer::connectSignals()
         connect(m_playbackEngine, SIGNAL(spectrumChanged(const QVector<float> &, int)),
                 m_spectrumWidget, SLOT(setSpectrum(const QVector<float> &, int)));
     }
-    if (m_levelMeter) {
-        connect(m_playbackEngine, SIGNAL(spectrumChanged(const QVector<float> &, int)),
-                m_levelMeter, SLOT(setSpectrum(const QVector<float> &, int)));
+    // level meters need an engine that measures levels (GStreamer does)
+    bool levels = m_playbackEngine->metaObject()->indexOfMethod("setLevelsEnabled(bool)") >= 0;
+    foreach (NLevelMeter *meter, m_levelMeters) {
+        if (levels) {
+            connect(m_playbackEngine,
+                    SIGNAL(levelsChanged(const QVector<float> &, const QVector<float> &)), meter,
+                    SLOT(setLevels(const QVector<float> &, const QVector<float> &)));
+        }
+    }
+    if (levels) {
+        QMetaObject::invokeMethod(m_playbackEngine, "setLevelsEnabled",
+                                  Q_ARG(bool, !m_levelMeters.isEmpty()));
     }
     if (QObject *builder = dynamic_cast<QObject *>(NPluginLoader::getPlugin(N::WaveformBuilder))) {
         connect(builder, SIGNAL(bpmDetected(const QString &, qreal)), this,
@@ -542,9 +551,7 @@ void NPlayer::applyVisualiserSettings()
     }
     QMetaObject::invokeMethod(m_playbackEngine, "setSpectrumFrameRate",
                               Q_ARG(int, m_settings->value("VisualiserFrameRate").toInt()));
-    // a skin's level meter runs on the same audio data, even with the visualiser off
-    QMetaObject::invokeMethod(m_playbackEngine, "setSpectrumEnabled",
-                              Q_ARG(bool, visualiser || m_levelMeter));
+    QMetaObject::invokeMethod(m_playbackEngine, "setSpectrumEnabled", Q_ARG(bool, visualiser));
 }
 
 void NPlayer::saveSettings()

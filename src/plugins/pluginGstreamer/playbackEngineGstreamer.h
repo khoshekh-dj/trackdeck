@@ -51,6 +51,20 @@ private:
     void releaseSpectrum();
     void clearSpectrum();
 
+    // live per-channel levels for skin meters, queued the same way
+    struct LevelFrame
+    {
+        GstClockTime due;
+        QVector<float> rms;
+        QVector<float> peak;
+    };
+    GstElement *m_level;
+    bool m_levelsEnabled;
+    QList<LevelFrame> m_levelQueue;
+    void queueLevels(GstMessage *msg);
+    void releaseLevels();
+    void updateBusPollInterval();
+
     QTimer *m_checkStatusTimer;
     QTimer *m_emitStateTimer;
     QTimer *m_gstBusPopTimer;
@@ -120,6 +134,8 @@ public:
     // Turns the visualiser's spectrum analysis on or off (called by name).
     Q_INVOKABLE void setSpectrumEnabled(bool enabled);
     Q_INVOKABLE void setSpectrumFrameRate(int framesPerSecond);
+    // Turns the per-channel level meters on or off (called by name).
+    Q_INVOKABLE void setLevelsEnabled(bool enabled);
 
 signals:
     void positionChanged(qreal pos);
@@ -132,6 +148,9 @@ signals:
     // magnitudes in dB (about -80..0) for equal-width bands from 0 Hz to
     // sampleRate / 2, emitted ~60 times a second while playing
     void spectrumChanged(const QVector<float> &magnitudes, int sampleRate);
+    // per channel (left, right, ...) in dBFS: the RMS and the highest
+    // peak of the last stretch, emitted with the spectrum while playing
+    void levelsChanged(const QVector<float> &rms, const QVector<float> &peak);
     void stateChanged(N::PlaybackState state);
     void tick(qint64 msec);
 };

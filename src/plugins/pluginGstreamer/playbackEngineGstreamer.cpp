@@ -98,7 +98,29 @@ void NPlaybackEngineGStreamer::init()
         g_object_set(m_spectrum, "bands", SPECTRUM_BANDS, "threshold", -80, "interval",
                      (guint64)(GST_SECOND / 30), "post-messages", FALSE, "message-magnitude",
                      TRUE, "message-phase", FALSE, NULL);
+    }
+    m_levelsEnabled = false;
+    m_level = gst_element_factory_make("level", NULL);
+    if (m_level) {
+        g_object_set(m_level, "interval", (guint64)(GST_SECOND / 30), "post-messages", FALSE,
+                     NULL);
+    }
+    // both analysers sit in the audio path: level -> spectrum
+    if (m_spectrum && m_level) {
+        GstElement *bin = gst_bin_new("analysers");
+        gst_bin_add_many(GST_BIN(bin), m_level, m_spectrum, NULL);
+        gst_element_link(m_level, m_spectrum);
+        GstPad *sink = gst_element_get_static_pad(m_level, "sink");
+        GstPad *src = gst_element_get_static_pad(m_spectrum, "src");
+        gst_element_add_pad(bin, gst_ghost_pad_new("sink", sink));
+        gst_element_add_pad(bin, gst_ghost_pad_new("src", src));
+        gst_object_unref(sink);
+        gst_object_unref(src);
+        g_object_set(m_playbin, "audio-filter", bin, NULL);
+    } else if (m_spectrum) {
         g_object_set(m_playbin, "audio-filter", m_spectrum, NULL);
+    } else if (m_level) {
+        g_object_set(m_playbin, "audio-filter", m_level, NULL);
     }
 
     // FIXME: https://gitlab.freedesktop.org/gstreamer/gst-plugins-bad/-/issues/1798
@@ -173,6 +195,7 @@ void NPlaybackEngineGStreamer::init()
         }
         gst_object_unref(bus);
         releaseSpectrum();
+        releaseLevels();
     });
 
     m_init = true;
@@ -459,6 +482,10 @@ void NPlaybackEngineGStreamer::processGstMessage(GstMessage *msg)
                 queueSpectrum(msg);
                 break;
             }
+            if (m_level && GST_MESSAGE_SRC(msg) == GST_OBJECT(m_level)) {
+                queueLevels(msg);
+                break;
+            }
             if (gst_is_missing_plugin_message(msg)) {
                 QString str = tr("Missing GStreamer plugin:<br/>");
                 gchar *detail = gst_missing_plugin_message_get_installer_detail(msg);
@@ -581,11 +608,30 @@ void NPlaybackEngineGStreamer::setSpectrumEnabled(bool enabled)
     if (m_spectrum) {
         g_object_set(m_spectrum, "post-messages", m_spectrumEnabled ? TRUE : FALSE, NULL);
     }
-    m_gstBusPopTimer->setInterval(m_spectrumEnabled ? GST_BUS_POP_SPECTRUM_MSEC
-                                                    : GST_BUS_POP_MSEC);
+    updateBusPollInterval();
     if (!m_spectrumEnabled) {
-        clearSpectrum();
+        m_spectrumQueue.clear();
+        m_spectrumRate = 0;
     }
+}
+
+void NPlaybackEngineGStreamer::setLevelsEnabled(bool enabled)
+{
+    m_levelsEnabled = enabled && m_level;
+    if (m_level) {
+        g_object_set(m_level, "post-messages", m_levelsEnabled ? TRUE : FALSE, NULL);
+    }
+    updateBusPollInterval();
+    if (!m_levelsEnabled) {
+        m_levelQueue.clear();
+    }
+}
+
+void NPlaybackEngineGStreamer::updateBusPollInterval()
+{
+    m_gstBusPopTimer->setInterval((m_spectrumEnabled || m_levelsEnabled)
+                                      ? GST_BUS_POP_SPECTRUM_MSEC
+                                      : GST_BUS_POP_MSEC);
 }
 
 void NPlaybackEngineGStreamer::setSpectrumFrameRate(int framesPerSecond)
@@ -594,6 +640,104 @@ void NPlaybackEngineGStreamer::setSpectrumFrameRate(int framesPerSecond)
         g_object_set(m_spectrum, "interval",
                      (guint64)(GST_SECOND / qBound(15, framesPerSecond, 60)), NULL);
     }
+    if (m_level) {
+        g_object_set(m_level, "interval",
+                     (guint64)(GST_SECOND / qBound(15, framesPerSecond, 60)), NULL);
+    }
+}
+
+// the level element posts its values as a GValueArray (or, in newer
+// versions, a GstValueArray) of doubles, one per channel
+static QVector<float> _levelValues(const GstStructure *s, const char *field)
+{
+    QVector<float> values;
+    const GValue *v = gst_structure_get_value(s, field);
+    if (!v) {
+        return values;
+    }
+    if (GST_VALUE_HOLDS_ARRAY(v)) {
+        guint n = gst_value_array_get_size(v);
+        for (guint i = 0; i < n; ++i) {
+            values.append((float)g_value_get_double(gst_value_array_get_value(v, i)));
+        }
+        return values;
+    }
+    G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+    if (G_VALUE_HOLDS(v, G_TYPE_VALUE_ARRAY)) {
+        GValueArray *array = (GValueArray *)g_value_get_boxed(v);
+        for (guint i = 0; array && i < array->n_values; ++i) {
+            values.append((float)g_value_get_double(g_value_array_get_nth(array, i)));
+        }
+    }
+    G_GNUC_END_IGNORE_DEPRECATIONS
+    return values;
+}
+
+void NPlaybackEngineGStreamer::queueLevels(GstMessage *msg)
+{
+    if (!m_levelsEnabled) {
+        return;
+    }
+    const GstStructure *s = gst_message_get_structure(msg);
+    if (!s || !gst_structure_has_name(s, "level")) {
+        return;
+    }
+    GstClockTime runningTime = 0, duration = 0;
+    gst_structure_get_clock_time(s, "running-time", &runningTime);
+    gst_structure_get_clock_time(s, "duration", &duration);
+
+    LevelFrame frame;
+    frame.due = runningTime + duration / 2;
+    frame.rms = _levelValues(s, "rms");
+    frame.peak = _levelValues(s, "peak");
+    if (frame.rms.isEmpty() || frame.rms.size() != frame.peak.size()) {
+        return;
+    }
+    m_levelQueue.append(frame);
+    if (m_levelQueue.size() > 120) {
+        m_levelQueue.removeFirst();
+    }
+}
+
+void NPlaybackEngineGStreamer::releaseLevels()
+{
+    if (!m_levelsEnabled || m_levelQueue.isEmpty()) {
+        return;
+    }
+    GstClock *clock = gst_element_get_clock(m_playbin);
+    if (!clock) {
+        return;
+    }
+    GstClockTime now = gst_clock_get_time(clock) - gst_element_get_base_time(m_playbin);
+    gst_object_unref(clock);
+
+    // the newest due frame, but with the loudest peak of the skipped ones
+    // so short transients still reach the meter
+    int last = -1;
+    QVector<float> peak;
+    for (int i = 0; i < m_levelQueue.size(); ++i) {
+        if (m_levelQueue.at(i).due > now) {
+            break;
+        }
+        last = i;
+        const QVector<float> &p = m_levelQueue.at(i).peak;
+        if (peak.size() != p.size()) {
+            peak = p;
+        } else {
+            for (int c = 0; c < p.size(); ++c) {
+                peak[c] = qMax(peak.at(c), p.at(c));
+            }
+        }
+    }
+    if (last < 0) {
+        if (m_levelQueue.first().due > now + 2 * GST_SECOND) {
+            m_levelQueue.clear();
+        }
+        return;
+    }
+    QVector<float> rms = m_levelQueue.at(last).rms;
+    m_levelQueue.erase(m_levelQueue.begin(), m_levelQueue.begin() + last + 1);
+    emit levelsChanged(rms, peak);
 }
 
 void NPlaybackEngineGStreamer::queueSpectrum(GstMessage *msg)
@@ -673,5 +817,6 @@ void NPlaybackEngineGStreamer::releaseSpectrum()
 void NPlaybackEngineGStreamer::clearSpectrum()
 {
     m_spectrumQueue.clear();
+    m_levelQueue.clear();
     m_spectrumRate = 0; // the next track may have a different rate
 }

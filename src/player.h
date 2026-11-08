@@ -57,7 +57,7 @@ private:
     NCoverReaderInterface *m_coverReader;
     NWaveformSlider *m_waveformSlider;
     NSpectrumWidget *m_spectrumWidget;
-    NLevelMeter *m_levelMeter;
+    QList<NLevelMeter *> m_levelMeters;
     NPreferencesDialog *m_preferencesDialog;
     NAboutDialog *m_aboutDialog;
     NVolumeSlider *m_volumeSlider;

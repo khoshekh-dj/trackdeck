@@ -22,13 +22,13 @@
 
 class QTimer;
 
-// A vertical LED level meter, like a mixer's channel meter. It sums the
-// playback engine's spectrum frames into one overall level, so it moves with
-// the music the same way the visualiser does. The level is the mix of both
-// channels, not left and right separately.
+// A vertical LED level meter, like a mixer's channel meter, for one channel
+// of the playback engine's levelsChanged() signal. The bar follows the RMS
+// level and a single lit segment holds the peak. Measured before the volume.
 class NLevelMeter : public QWidget
 {
     Q_OBJECT
+    Q_PROPERTY(int channel READ channel WRITE setChannel) // 0 left, 1 right
     Q_PROPERTY(int segments READ segments WRITE setSegments)
     Q_PROPERTY(int segment_gap READ segmentGap WRITE setSegmentGap)
     Q_PROPERTY(QColor low_color READ lowColor WRITE setLowColor)
@@ -41,6 +41,8 @@ class NLevelMeter : public QWidget
 public:
     NLevelMeter(QWidget *parent = 0);
 
+    int channel() const { return m_channel; }
+    void setChannel(int channel) { m_channel = qMax(0, channel); }
     int segments() const { return m_segments; }
     void setSegments(int n);
     int segmentGap() const { return m_gap; }
@@ -63,7 +65,7 @@ public:
     QSize minimumSizeHint() const;
 
 public slots:
-    void setSpectrum(const QVector<float> &magnitudes, int sampleRate);
+    void setLevels(const QVector<float> &rms, const QVector<float> &peak);
     void clear();
 
 protected:
@@ -78,7 +80,9 @@ private:
     qint64 m_lastTick;
     qint64 m_lastFrame;
 
+    int m_channel;
     float m_target; // 0..1
+    float m_peakTarget;
     float m_level;
     float m_peak;
     double m_peakHold;

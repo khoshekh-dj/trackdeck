@@ -16,7 +16,7 @@ A dark design with large cover art, the title, artist and album, a BPM · kbps �
 - **Album art as the background:** the current track's cover, blurred and darkened, fills the window behind the player.
 - **Khoshekh skin:** the same layout in a deep teal and cream palette.
 - **Booth skin:** graphite panels and a black player screen with segment-display BPM and time-remaining readouts, the key, and round backlit buttons. Its accent follows your accent colour.
-- **Mixer skin:** a black chassis with a channel strip: an LED level meter and a fader for the volume. The visualiser shows as LED segments and the buttons are rubber pads.
+- **Mixer skin:** a black chassis with a channel strip with left and right LED level meters and a fader for the volume. The visualiser shows as LED segments and the buttons are rubber pads.
 - **Retro skin:** bevelled grey panels and a green-on-black display, a tribute to the desktop players of the late '90s.
 
 To switch skins, use Preferences → General → Skin, then restart TrackDeck.
