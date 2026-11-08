@@ -16,6 +16,7 @@ A dark design with large cover art, the title, artist and album, a BPM · kbps �
 - **Album art as the background:** the current track's cover, blurred and darkened, fills the window behind the player.
 - **Khoshekh skin:** the same layout in a deep teal and cream palette.
 - **Booth skin:** graphite panels and a black player screen with segment-display BPM and time-remaining readouts, the key, and round backlit buttons. Its accent follows your accent colour.
+- **Mixer skin:** a black chassis with a channel strip: an LED level meter and a fader for the volume. The visualiser shows as LED segments and the buttons are rubber pads.
 - **Retro skin:** bevelled grey panels and a green-on-black display, a tribute to the desktop players of the late '90s.
 
 To switch skins, use Preferences → General → Skin, then restart TrackDeck.
@@ -74,8 +75,8 @@ The fields are Title, Artist, Album, Album artist, Remixer, Date, Genre, BPM, Ke
 
 - TrackDeck is a fork of [Nulloy](https://github.com/nulloy/nulloy), Copyright (C) 2010-2024 Sergey Vlasov. TrackDeck modifications are copyright (C) 2026 Khoshekh.
 - TrackDeck is free software under the [GNU GPL v3](LICENSE.GPL3).
-- Skins are CC-BY-SA 3.0. The Modern, Khoshekh, Booth and Retro skins build on the skin scripts of Nulloy's Metro, Silver and Slim skins by Sergey Vlasov.
-- The Booth skin includes the [DSEG7](https://github.com/keshikan/DSEG) font by keshikan, under the SIL Open Font License 1.1 (`src/skins/booth/DSEG-LICENSE.txt`).
+- Skins are CC-BY-SA 3.0. The Modern, Khoshekh, Booth, Mixer and Retro skins build on the skin scripts of Nulloy's Metro, Silver and Slim skins by Sergey Vlasov.
+- The Booth and Mixer skins include the [DSEG7](https://github.com/keshikan/DSEG) font by keshikan, under the SIL Open Font License 1.1 (`src/skins/booth/DSEG-LICENSE.txt`, `src/skins/mixer/DSEG-LICENSE.txt`).
 - BPM detection uses [aubio](https://aubio.org) (GPL-3.0).
 - "Nulloy" is the name of the original project. TrackDeck is not affiliated with or endorsed by it.
 - The macOS and Windows builds bundle Qt, GStreamer, TagLib, aubio and their dependencies. Their licences are in `TrackDeck.app/Contents/Resources/Licenses` on macOS and in the `licenses` folder on Windows.

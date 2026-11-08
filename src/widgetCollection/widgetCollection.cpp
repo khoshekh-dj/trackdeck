@@ -20,6 +20,7 @@
 
 #include "coverWidget.h"
 #include "label.h"
+#include "levelMeter.h"
 #include "playlistWidget.h"
 #include "slider.h"
 #include "spectrumWidget.h"
@@ -44,6 +45,7 @@ N_WIDGET_PLUGIN(NVolumeSlider)
 N_WIDGET_PLUGIN(NWaveformSlider)
 N_WIDGET_PLUGIN(NCoverWidget)
 N_WIDGET_PLUGIN(NSpectrumWidget)
+N_WIDGET_PLUGIN(NLevelMeter)
 N_WIDGET_PLUGIN(QSizeGrip)
 
 static inline QString _domXml(const QString &className, const QString &name)
@@ -91,4 +93,5 @@ NWidgetCollection::NWidgetCollection(QObject *parent) : QObject(parent)
     m_plugins.push_back(new NLabelPlugin(this));
     m_plugins.push_back(new NCoverWidgetPlugin(this));
     m_plugins.push_back(new NSpectrumWidgetPlugin(this));
+    m_plugins.push_back(new NLevelMeterPlugin(this));
 }

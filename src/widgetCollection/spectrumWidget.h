@@ -30,6 +30,8 @@ class QTimer;
 class NSpectrumWidget : public QWidget
 {
     Q_OBJECT
+    // a skin can pin the style (e.g. "segments"); empty follows Preferences
+    Q_PROPERTY(QString forced_style READ forcedStyle WRITE setForcedStyle)
 
 public:
     // Appearance, as chosen in Preferences. String values match the settings.
@@ -53,6 +55,9 @@ public:
     // the waveform's colour settings, used when colors == "waveform"
     void setColorScheme(bool rgb, const QString &scheme, const QColor &accent);
     void setAppearance(const Appearance &appearance);
+
+    QString forcedStyle() const { return m_forcedStyle; }
+    void setForcedStyle(const QString &style);
 
 public slots:
     void setSpectrum(const QVector<float> &magnitudes, int sampleRate);
@@ -94,6 +99,8 @@ private:
     QString m_scheme;
     QColor m_accent;
     Appearance m_appearance;
+    QString m_userStyle;   // the style chosen in Preferences
+    QString m_forcedStyle; // the skin's override, if any
 
     // bars pre-rendered at full height (lit and unlit); each frame copies
     // the visible part of each bar instead of painting gradients

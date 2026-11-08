@@ -26,6 +26,7 @@ class NMainWindow;
 class NPlaybackEngineInterface;
 class NPlaylistWidget;
 class NSpectrumWidget;
+class NLevelMeter;
 class NWaveformSlider;
 class NCoverWidget;
 class NCoverReaderInterface;
@@ -56,6 +57,7 @@ private:
     NCoverReaderInterface *m_coverReader;
     NWaveformSlider *m_waveformSlider;
     NSpectrumWidget *m_spectrumWidget;
+    NLevelMeter *m_levelMeter;
     NPreferencesDialog *m_preferencesDialog;
     NAboutDialog *m_aboutDialog;
     NVolumeSlider *m_volumeSlider;
