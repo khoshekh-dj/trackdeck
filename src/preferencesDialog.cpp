@@ -50,12 +50,6 @@
 #include <QTextCodec>
 #include <QVBoxLayout>
 
-// Waveform colour schemes (setting value, label)
-static const QList<QPair<QString, QString>> _waveformSchemes = {
-    {"rgb", "RGB (balanced)"},
-    {"vivid", "Vivid RGB"},
-    {"accent", "Accent colour"},
-};
 // Accent colour presets (hex, label)
 static const QList<QPair<QString, QString>> _accentPresets = {
     {"#3D8BFF", "Electric blue"}, {"#1ED760", "Neon green"}, {"#FF3D9A", "Pink"},
@@ -70,30 +64,69 @@ static QIcon _swatch(const QColor &color)
     return QIcon(pm);
 }
 
-// Visualiser options: combo box name, setting, (value, label) choices
-struct _VisualiserOption
+// Drop-downs that store their choice in one setting: combo box name,
+// setting, (value, label) choices. Labels are translated when added.
+struct _ComboOption
 {
     const char *combo;
     const char *setting;
-    QList<QPair<QString, QString>> choices;
+    QList<QPair<QString, const char *>> choices;
 };
-static const QList<_VisualiserOption> _visualiserOptions = {
+static const QList<_ComboOption> _comboOptions = {
+    {"waveformColorSchemeComboBox", "WaveformColorScheme",
+     {
+      {"rgb", QT_TRANSLATE_NOOP("NPreferencesDialog", "RGB (balanced)")},
+      {"vivid", QT_TRANSLATE_NOOP("NPreferencesDialog", "Vivid RGB")},
+      {"accent", QT_TRANSLATE_NOOP("NPreferencesDialog", "Accent colour")}}},
+    {"openPlaylistBehaviourComboBox", "OpenPlaylistBehaviour",
+     {
+      {"ask", QT_TRANSLATE_NOOP("NPreferencesDialog", "Ask each time")},
+      {"replace", QT_TRANSLATE_NOOP("NPreferencesDialog", "Replace the current list")},
+      {"add", QT_TRANSLATE_NOOP("NPreferencesDialog", "Add to the current list")}}},
+    {"id3v2VersionComboBox", "TagEditorID3v2Version",
+     {
+      {"3", QT_TRANSLATE_NOOP("NPreferencesDialog", "ID3v2.3 (most compatible)")},
+      {"4", QT_TRANSLATE_NOOP("NPreferencesDialog", "ID3v2.4")}}},
+    {"keyNotationComboBox", "KeyNotation",
+     {
+      {"tag", QT_TRANSLATE_NOOP("NPreferencesDialog", "As tagged")},
+      {"camelot", QT_TRANSLATE_NOOP("NPreferencesDialog", "Camelot (8A, 8B)")},
+      {"musical", QT_TRANSLATE_NOOP("NPreferencesDialog", "Musical (Am, C)")}}},
     {"visualiserStyleComboBox", "VisualiserStyle",
-     {{"bars", "Bars"}, {"segments", "LED segments"}, {"mirrored", "Mirrored"},
-      {"curve", "Smooth curve"}}},
+     {
+      {"bars", QT_TRANSLATE_NOOP("NPreferencesDialog", "Bars")},
+      {"segments", QT_TRANSLATE_NOOP("NPreferencesDialog", "LED segments")},
+      {"mirrored", QT_TRANSLATE_NOOP("NPreferencesDialog", "Mirrored")},
+      {"curve", QT_TRANSLATE_NOOP("NPreferencesDialog", "Smooth curve")}}},
     {"visualiserDensityComboBox", "VisualiserDensity",
-     {{"wide", "Fewer, wider"}, {"normal", "Normal"}, {"narrow", "More, thinner"}}},
+     {
+      {"wide", QT_TRANSLATE_NOOP("NPreferencesDialog", "Fewer, wider")},
+      {"normal", QT_TRANSLATE_NOOP("NPreferencesDialog", "Normal")},
+      {"narrow", QT_TRANSLATE_NOOP("NPreferencesDialog", "More, thinner")}}},
     {"visualiserSensitivityComboBox", "VisualiserSensitivity",
-     {{"low", "Low"}, {"normal", "Normal"}, {"high", "High"}}},
+     {
+      {"low", QT_TRANSLATE_NOOP("NPreferencesDialog", "Low")},
+      {"normal", QT_TRANSLATE_NOOP("NPreferencesDialog", "Normal")},
+      {"high", QT_TRANSLATE_NOOP("NPreferencesDialog", "High")}}},
     {"visualiserTrebleBoostComboBox", "VisualiserTrebleBoost",
-     {{"off", "Off"}, {"normal", "Normal"}, {"strong", "Strong"}}},
+     {
+      {"off", QT_TRANSLATE_NOOP("NPreferencesDialog", "Off")},
+      {"normal", QT_TRANSLATE_NOOP("NPreferencesDialog", "Normal")},
+      {"strong", QT_TRANSLATE_NOOP("NPreferencesDialog", "Strong")}}},
     {"visualiserFallSpeedComboBox", "VisualiserFallSpeed",
-     {{"slow", "Slow"}, {"normal", "Normal"}, {"fast", "Fast"}}},
+     {
+      {"slow", QT_TRANSLATE_NOOP("NPreferencesDialog", "Slow")},
+      {"normal", QT_TRANSLATE_NOOP("NPreferencesDialog", "Normal")},
+      {"fast", QT_TRANSLATE_NOOP("NPreferencesDialog", "Fast")}}},
     {"visualiserFrameRateComboBox", "VisualiserFrameRate",
-     {{"30", "30 per second (lighter)"}, {"60", "60 per second (smoother)"}}},
+     {
+      {"30", QT_TRANSLATE_NOOP("NPreferencesDialog", "30 per second (lighter)")},
+      {"60", QT_TRANSLATE_NOOP("NPreferencesDialog", "60 per second (smoother)")}}},
     {"visualiserColorsComboBox", "VisualiserColors",
-     {{"waveform", "Follow waveform colours"}, {"accent", "Accent colour"},
-      {"gradient", "Custom gradient"}}},
+     {
+      {"waveform", QT_TRANSLATE_NOOP("NPreferencesDialog", "Follow waveform colours")},
+      {"accent", QT_TRANSLATE_NOOP("NPreferencesDialog", "Accent colour")},
+      {"gradient", QT_TRANSLATE_NOOP("NPreferencesDialog", "Custom gradient")}}},
 };
 
 // a colour button shows its colour as an icon and keeps it in a property
@@ -121,8 +154,11 @@ NPreferencesDialog::NPreferencesDialog(NPlayer *player, QWidget *parent) : QDial
     m_player = player;
 
     ui.setupUi(this);
-    for (const auto &scheme : _waveformSchemes) {
-        ui.waveformColorSchemeComboBox->addItem(scheme.second, scheme.first);
+    for (const _ComboOption &option : _comboOptions) {
+        QComboBox *combo = findChild<QComboBox *>(option.combo);
+        for (const auto &choice : option.choices) {
+            combo->addItem(tr(choice.second), choice.first);
+        }
     }
     connect(ui.waveformRgbCheckBox, &QCheckBox::toggled, ui.waveformColorSchemeComboBox,
             &QWidget::setEnabled);
@@ -149,9 +185,6 @@ NPreferencesDialog::NPreferencesDialog(NPlayer *player, QWidget *parent) : QDial
             &QWidget::setEnabled);
 
     // playlists >>
-    ui.openPlaylistBehaviourComboBox->addItem(tr("Ask each time"), "ask");
-    ui.openPlaylistBehaviourComboBox->addItem(tr("Replace the current list"), "replace");
-    ui.openPlaylistBehaviourComboBox->addItem(tr("Add to the current list"), "add");
     connect(ui.playlistsFolderBrowseButton, &QPushButton::clicked, [this]() {
         QString current = ui.playlistsFolderLineEdit->text();
         if (current.startsWith("~/")) {
@@ -165,12 +198,6 @@ NPreferencesDialog::NPreferencesDialog(NPlayer *player, QWidget *parent) : QDial
     // << playlists
 
     // visualiser >>
-    for (const _VisualiserOption &option : _visualiserOptions) {
-        QComboBox *combo = findChild<QComboBox *>(option.combo);
-        for (const auto &choice : option.choices) {
-            combo->addItem(tr(choice.second.toUtf8().constData()), choice.first);
-        }
-    }
     connect(ui.visualiserCheckBox, &QCheckBox::toggled, ui.visualiserOptions, &QWidget::setEnabled);
     connect(ui.visualiserColorsComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             [this]() {
@@ -288,11 +315,6 @@ NPreferencesDialog::NPreferencesDialog(NPlayer *player, QWidget *parent) : QDial
     ui.waveformTrackInfoTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     NUtils::fillEncodingComboBox(ui.encodingTrackInfoComboBox, "UTF-8");
-    ui.id3v2VersionComboBox->addItem(tr("ID3v2.3 (most compatible)"), 3);
-    ui.id3v2VersionComboBox->addItem(tr("ID3v2.4"), 4);
-    ui.keyNotationComboBox->addItem(tr("As tagged"), "tag");
-    ui.keyNotationComboBox->addItem(tr("Camelot (8A, 8B)"), "camelot");
-    ui.keyNotationComboBox->addItem(tr("Musical (Am, C)"), "musical");
 }
 
 void NPreferencesDialog::showEvent(QShowEvent *event)
@@ -559,6 +581,12 @@ static const QStringList _playlistColumnCatalog = {
 
 void NPreferencesDialog::loadSettings()
 {
+    for (const _ComboOption &option : _comboOptions) {
+        QComboBox *combo = findChild<QComboBox *>(option.combo);
+        int index = combo->findData(NSettings::instance()->value(option.setting).toString());
+        combo->setCurrentIndex(qMax(0, index));
+    }
+
     // general >>
     QList<QWidget *> widgets = findChildren<QWidget *>();
     foreach (QWidget *widget, widgets) {
@@ -625,9 +653,6 @@ void NPreferencesDialog::loadSettings()
 
     // waveform colours & accent >>
     {
-        int scheme = ui.waveformColorSchemeComboBox->findData(
-            NSettings::instance()->value("WaveformColorScheme").toString());
-        ui.waveformColorSchemeComboBox->setCurrentIndex(qMax(0, scheme));
         ui.waveformColorSchemeComboBox->setEnabled(ui.waveformRgbCheckBox->isChecked());
 
         QString accent = NSettings::instance()->value("AccentColor").toString().toUpper();
@@ -643,17 +668,7 @@ void NPreferencesDialog::loadSettings()
     }
     // << waveform colours & accent
 
-    // playlists >>
-    ui.openPlaylistBehaviourComboBox->setCurrentIndex(qMax(0, ui.openPlaylistBehaviourComboBox->findData(
-        NSettings::instance()->value("OpenPlaylistBehaviour").toString())));
-    // << playlists
-
     // visualiser >>
-    for (const _VisualiserOption &option : _visualiserOptions) {
-        QComboBox *combo = findChild<QComboBox *>(option.combo);
-        int index = combo->findData(NSettings::instance()->value(option.setting).toString());
-        combo->setCurrentIndex(qMax(0, index));
-    }
     _setButtonColor(ui.visualiserGradientFromButton,
                     QColor(NSettings::instance()->value("VisualiserGradientFrom").toString()));
     _setButtonColor(ui.visualiserGradientToButton,
@@ -688,14 +703,6 @@ void NPreferencesDialog::loadSettings()
         ui.playlistColumnsList->setEnabled(ui.playlistColumnsCheckBox->isChecked());
     }
     // << playlist columns
-
-    // ID3v2 version >>
-    ui.id3v2VersionComboBox->setCurrentIndex(qMax(
-        0, ui.id3v2VersionComboBox->findData(
-               NSettings::instance()->value("TagEditorID3v2Version").toInt())));
-    ui.keyNotationComboBox->setCurrentIndex(qMax(
-        0, ui.keyNotationComboBox->findData(NSettings::instance()->value("KeyNotation").toString())));
-    // << ID3v2 version
 
     // track info encoding >>
     NUtils::fillEncodingComboBox(ui.encodingTrackInfoComboBox,
@@ -781,6 +788,11 @@ void NPreferencesDialog::loadSettings()
 
 void NPreferencesDialog::saveSettings()
 {
+    for (const _ComboOption &option : _comboOptions) {
+        NSettings::instance()->setValue(option.setting,
+                                        findChild<QComboBox *>(option.combo)->currentData());
+    }
+
     // general >>
     QList<QWidget *> widgets = findChildren<QWidget *>();
     foreach (QWidget *widget, widgets) {
@@ -831,8 +843,6 @@ void NPreferencesDialog::saveSettings()
     // << track info overlay
 
     // waveform colours & accent >>
-    NSettings::instance()->setValue("WaveformColorScheme",
-                                    ui.waveformColorSchemeComboBox->currentData().toString());
     {
         QString accent = ui.accentColorComboBox->currentData().toString();
         if (QColor(accent).isValid()) {
@@ -841,16 +851,7 @@ void NPreferencesDialog::saveSettings()
     }
     // << waveform colours & accent
 
-    // playlists >>
-    NSettings::instance()->setValue("OpenPlaylistBehaviour",
-                                    ui.openPlaylistBehaviourComboBox->currentData());
-    // << playlists
-
     // visualiser >>
-    for (const _VisualiserOption &option : _visualiserOptions) {
-        NSettings::instance()->setValue(option.setting,
-                                        findChild<QComboBox *>(option.combo)->currentData());
-    }
     NSettings::instance()->setValue("VisualiserGradientFrom",
                                     ui.visualiserGradientFromButton->property("color"));
     NSettings::instance()->setValue("VisualiserGradientTo",
@@ -876,13 +877,6 @@ void NPreferencesDialog::saveSettings()
     NSettings::instance()->setValue("EncodingTrackInfo",
                                     ui.encodingTrackInfoComboBox->currentData().toString());
     // << track info encoding
-
-    // ID3v2 version >>
-    NSettings::instance()->setValue("TagEditorID3v2Version",
-                                    ui.id3v2VersionComboBox->currentData().toInt());
-    NSettings::instance()->setValue("KeyNotation",
-                                    ui.keyNotationComboBox->currentData().toString());
-    // << ID3v2 version
 
     // tooltip offset >>
     int tooltipOffsetX = ui.tooltipOffsetXSpinBox->value();
