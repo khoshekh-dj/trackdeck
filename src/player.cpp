@@ -672,6 +672,14 @@ void NPlayer::quit()
 
 void NPlayer::on_playbackEngine_mediaChanged(const QString &file, int)
 {
+    // a different track starts at 100 % speed, as if the pitch were reset
+    if (!file.isEmpty() && file != m_speedMedia) {
+        if (!m_speedMedia.isEmpty() && m_playbackEngine->speed() != 1.0) {
+            m_playbackEngine->setSpeed(1.0);
+        }
+        m_speedMedia = file;
+    }
+
     QString title;
     QString format = NSettings::instance()->value("WindowTitleTrackInfo").toString();
     if (!format.isEmpty()) {

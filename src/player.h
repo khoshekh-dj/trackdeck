@@ -156,6 +156,7 @@ private:
     NTrackInfoReader *m_skinTrackInfoReader;
     QImage m_currentCover;
     QString m_ambientImagePath;
+    QString m_speedMedia; // the track the playback speed was last set for
     int m_ambientImageCounter = 0;
     void updateAmbientImage();
 };
