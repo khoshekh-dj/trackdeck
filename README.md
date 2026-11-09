@@ -4,7 +4,7 @@
 
 **TrackDeck** is a music player for DJs. It has an RGB waveform, a live spectrum visualiser, automatic BPM detection, tag-based playlist columns and a modern dark skin. It's based on [Nulloy](https://github.com/nulloy/nulloy) by Sergey Vlasov and is released under the same [GPL-3.0](LICENSE.GPL3) licence.
 
-**Download:** builds for **macOS (Apple Silicon or Intel, macOS 15 Sequoia+)** and **Windows 10/11 (x64)** are in the [releases](https://github.com/khoshekh-dj/trackdeck/releases). On an older Mac, see [Older Macs](#older-macs) below.
+**Download:** builds for **macOS (Apple Silicon or Intel, macOS 15 Sequoia+)**, **macOS 12 Monterey+ (Intel)** and **Windows 10/11 (x64)** are in the [releases](https://github.com/khoshekh-dj/trackdeck/releases). For other older Macs, see [Older Macs](#older-macs) below.
 - macOS: open the `.dmg` and drag TrackDeck to Applications. The app isn't notarized, so the first time, right-click it and choose **Open**.
 - Windows: an installer (`…-Setup.exe`) or a portable `.zip`. The installer installs just for you, with no admin password, and adds TrackDeck to the Start menu; settings go in `%AppData%\TrackDeck`. The `.zip` runs from anywhere, e.g. a USB stick: unzip it and run `TrackDeck\TrackDeck.exe`; it keeps its settings in the same folder. If SmartScreen warns about either, choose **More info → Run anyway**.
 
@@ -15,6 +15,10 @@ A dark design with large cover art, the title, artist and album, a BPM · kbps �
 - **Accent colour:** choose from presets (electric blue, neon green, pink, orange, purple, red, teal) or pick your own in Preferences → Track Information.
 - **Album art as the background:** the current track's cover, blurred and darkened, fills the window behind the player.
 - **Khoshekh skin:** the same layout in a deep teal and cream palette.
+- **Booth skin:** graphite panels and a black player screen with segment-display BPM and time-remaining readouts, the key, and round backlit buttons. Its accent follows your accent colour.
+- **Mixer skin:** a black chassis with a channel strip with left and right LED level meters and a fader for the volume. The visualiser shows as LED segments and the buttons are rubber pads.
+- **Turntable skin:** a brushed silver deck with the cover art as the record label on a platter with strobe dots, a ±8 % pitch fader that changes the playback speed, and a big start/stop button. BPM and time remaining follow the pitch, and each new track starts back at 0 %.
+- **Retro skin:** bevelled grey panels and a green-on-black display, a tribute to the desktop players of the late '90s.
 
 To switch skins, use Preferences → General → Skin, then restart TrackDeck.
 
@@ -47,6 +51,8 @@ For tracks without a BPM tag, TrackDeck works out the tempo the first time you p
 ### Playlist columns
 The playlist can show columns from your tags: Artist, Title, Album, Genre, Key, Label, BPM, Year, Track, Bitrate and Duration. In Preferences → Track Information, tick the columns you want and drag them into order. Columns are resizable. To turn them off, untick *Show playlist as columns*.
 
+Keys can be shown as they're tagged, in Camelot notation (8A, 8B) or as musical names (Am, C): Preferences → Track Information → *Key notation*. TrackDeck reads Camelot, Open Key (1m) and names such as F# minor, and converts between them. The playlist, the skins and the window title follow the setting.
+
 ![Playlist columns with Genre, BPM, Key and Label, sorted by key](docs/assets/keysort.jpg)
 
 <img src="docs/screenshots/preferences.jpg" width="420" alt="Preferences, Track Information tab: columns to show, BPM detection, waveform colours and accent colour">
@@ -72,7 +78,8 @@ The fields are Title, Artist, Album, Album artist, Remixer, Date, Genre, BPM, Ke
 
 - TrackDeck is a fork of [Nulloy](https://github.com/nulloy/nulloy), Copyright (C) 2010-2024 Sergey Vlasov. TrackDeck modifications are copyright (C) 2026 Khoshekh.
 - TrackDeck is free software under the [GNU GPL v3](LICENSE.GPL3).
-- Skins are CC-BY-SA 3.0. The Modern and Khoshekh skins build on the skin scripts of Nulloy's Metro, Silver and Slim skins by Sergey Vlasov.
+- Skins are CC-BY-SA 3.0. The Modern, Khoshekh, Booth, Mixer, Retro and Turntable skins build on the skin scripts of Nulloy's Metro, Silver and Slim skins by Sergey Vlasov.
+- The Booth and Mixer skins include the [DSEG7](https://github.com/keshikan/DSEG) font by keshikan, under the SIL Open Font License 1.1 (`src/skins/booth/DSEG-LICENSE.txt`, `src/skins/mixer/DSEG-LICENSE.txt`).
 - BPM detection uses [aubio](https://aubio.org) (GPL-3.0).
 - "Nulloy" is the name of the original project. TrackDeck is not affiliated with or endorsed by it.
 - The macOS and Windows builds bundle Qt, GStreamer, TagLib, aubio and their dependencies. Their licences are in `TrackDeck.app/Contents/Resources/Licenses` on macOS and in the `licenses` folder on Windows.
@@ -207,7 +214,9 @@ The result is not notarized, so on first launch right-click the app and choose *
 
 ### Older Macs
 
-The release builds need macOS 15 Sequoia or newer, because Homebrew's libraries only support recent macOS. To build for an older Mac, such as macOS 12 Monterey, use MacPorts, which compiles everything for the Mac it runs on:
+The main release builds need macOS 15 Sequoia or newer, because Homebrew's libraries only support recent macOS. Each release also has a `macOS12-Intel` download for Intel Macs on macOS 12 Monterey or newer, built with MacPorts on a Monterey Mac (`.github/workflows/macos-12.yml`, a self-hosted runner). Its first launch takes a minute or two while it scans its audio plugins.
+
+To build for another older Mac, such as an Apple Silicon Mac on macOS 12 or 13, use MacPorts, which compiles everything for the Mac it runs on:
 
 ```sh
 xcode-select --install          # Xcode Command Line Tools

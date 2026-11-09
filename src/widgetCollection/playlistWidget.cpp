@@ -1210,6 +1210,19 @@ void NPlaylistWidget::refreshItemsForFiles(const QStringList &files)
     viewport()->update();
 }
 
+// Marks every row's texts as out of date (e.g. the key notation changed);
+// visible rows are re-read now, the rest when they scroll into view
+void NPlaylistWidget::invalidateItemData()
+{
+    for (int row = 0; row < count(); ++row) {
+        if (NPlaylistWidgetItem *item = itemAtRow(row)) {
+            item->setData(N::TitleFormatRole, QString());
+        }
+    }
+    processVisibleItems();
+    viewport()->update();
+}
+
 void NPlaylistWidget::refreshItemsForFile(const QString &file)
 {
     QString titleFormat = NSettings::instance()->value("PlaylistTrackInfo").toString();
@@ -1275,60 +1288,6 @@ double parseNumber(const QString &text)
     return m.captured(0).replace(',', '.').toDouble();
 }
 
-// Position on the Camelot wheel: 1A, 1B, 2A ... 12B (A minor, B major), so
-// harmonically related keys sort next to each other. Accepts Camelot ("8A"),
-// Open Key ("1m", "6d") and classic names ("Am", "A minor", "F#", "Gbm").
-// -1 if unrecognised.
-int camelotIndex(const QString &rawKey)
-{
-    QString key = rawKey.trimmed();
-    if (key.isEmpty()) {
-        return -1;
-    }
-
-    static const QRegularExpression camelot("^(\\d{1,2})\\s*([ABab])$");
-    QRegularExpressionMatch m = camelot.match(key);
-    if (m.hasMatch()) {
-        int n = m.captured(1).toInt();
-        if (n >= 1 && n <= 12) {
-            return (n - 1) * 2 + (m.captured(2).toUpper() == "B" ? 1 : 0);
-        }
-    }
-    static const QRegularExpression openKey("^(\\d{1,2})\\s*([mdMD])$");
-    m = openKey.match(key);
-    if (m.hasMatch()) {
-        int n = m.captured(1).toInt();
-        if (n >= 1 && n <= 12) {
-            int camelotNumber = (n - 1 + 7) % 12 + 1; // 1m = 8A (A minor), 1d = 8B (C major)
-            return (camelotNumber - 1) * 2 + (m.captured(2).toLower() == "d" ? 1 : 0);
-        }
-    }
-
-    // classic notation: note name, optional #/b, then minor/major marker
-    static const QRegularExpression classic(
-        "^([A-Ga-g])\\s*([#♯b♭]?)\\s*(m|min|minor|maj|major|M)?$");
-    m = classic.match(key);
-    if (!m.hasMatch()) {
-        return -1;
-    }
-    static const QMap<QString, int> semitone = {{"C", 0}, {"D", 2}, {"E", 4}, {"F", 5},
-                                                {"G", 7}, {"A", 9}, {"B", 11}};
-    int note = semitone.value(m.captured(1).toUpper());
-    QString accidental = m.captured(2);
-    if (accidental == "#" || accidental == "♯") {
-        note += 1;
-    } else if (accidental == "b" || accidental == "♭") {
-        note -= 1;
-    }
-    note = (note + 12) % 12;
-    QString quality = m.captured(3);
-    bool minor = quality == "m" || quality.startsWith("min");
-    // Camelot numbers by semitone: majors are B, minors are A
-    static const int majorNumber[12] = {8, 3, 10, 5, 12, 7, 2, 9, 4, 11, 6, 1};  // C, C#, D ...
-    static const int minorNumber[12] = {5, 12, 7, 2, 9, 4, 11, 6, 1, 8, 3, 10};  // Cm, C#m ...
-    int n = minor ? minorNumber[note] : majorNumber[note];
-    return (n - 1) * 2 + (minor ? 0 : 1);
-}
 } // namespace
 
 void NPlaylistWidget::updateSortIndicator()
@@ -1458,7 +1417,7 @@ void NPlaylistWidget::sortRows(int column, Qt::SortOrder order)
                 value = parseDuration(text);
                 break;
             case SortKey:
-                value = camelotIndex(text);
+                value = NUtils::camelotIndex(text);
                 break;
             case SortText:
                 break;

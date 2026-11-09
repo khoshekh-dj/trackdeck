@@ -101,7 +101,7 @@ jobs:
           fi
           file="TrackDeck-${label}-macOS-${{ matrix.label }}.dmg"
           mv dist/TrackDeck.dmg "dist/$file"
-          shasum -a 256 "dist/$file" | tee "dist/$file.sha256"
+          (cd dist && shasum -a 256 "$file" | tee "$file.sha256")
           echo "file=$file" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifact

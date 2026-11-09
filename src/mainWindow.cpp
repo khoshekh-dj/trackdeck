@@ -199,7 +199,9 @@ void NMainWindow::toggleMaximize()
 
 void NMainWindow::toggleFullScreen()
 {
-    if (!m_isFullScreen) {
+    // set before the window changes, so changeEvent() sees it as ours
+    m_isFullScreen = !m_isFullScreen;
+    if (m_isFullScreen) {
         if (!m_unmaximizedSize.isValid()) {
             m_unmaximizedSize = size();
             m_unmaximizedPos = pos();
@@ -219,7 +221,6 @@ void NMainWindow::toggleFullScreen()
         }
     }
 
-    m_isFullScreen = !m_isFullScreen;
     emit fullScreenEnabled(m_isFullScreen);
 }
 
@@ -234,6 +235,21 @@ void NMainWindow::changeEvent(QEvent *event)
     QWidget::changeEvent(event);
 
     emit focusChanged(isActiveWindow());
+
+    // Full screen can also be left (or entered) without toggleFullScreen(), e.g. with
+    // macOS's own Exit Full Screen, Esc or Ctrl+Cmd+F. Follow it, or the skin stays
+    // in its full screen layout.
+    if (event->type() == QEvent::WindowStateChange) {
+        bool fullScreen = windowState() & Qt::WindowFullScreen;
+        if (fullScreen != m_isFullScreen) {
+            m_isFullScreen = fullScreen;
+            if (!fullScreen) {
+                m_unmaximizedSize = QSize(); // the system has put the window back
+                m_unmaximizedPos = QPoint();
+            }
+            emit fullScreenEnabled(m_isFullScreen);
+        }
+    }
 
     if (windowFlags() & Qt::FramelessWindowHint) {
         setAttribute(Qt::WA_Hover, true);

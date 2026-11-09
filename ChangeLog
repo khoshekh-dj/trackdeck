@@ -1,3 +1,16 @@
+* 1.3.3, Sun Nov 8 2026
+- New: Booth skin: graphite panels, a black player screen with segment-display BPM, key and time-remaining readouts, and round backlit buttons. Amber by default; follows the accent colour
+- New: Mixer skin: a black chassis with a MASTER channel strip, left and right LED level meters and a volume fader, LED visualiser and rubber pad buttons. Blue by default; follows the accent colour
+- New: Turntable skin: a brushed silver deck with the cover art as the record label on a platter with strobe dots, a ±8 % pitch fader that sets the playback speed, and a big start/stop button. BPM and time remaining follow the pitch. Red by default; follows the accent colour
+- New: Preferences > Track Information > Key notation: show keys as tagged, as Camelot (8A) or as musical names (Am). The playlist, skins and window title follow it
+- New: macOS 12 Monterey download for Intel Macs (TrackDeck-<version>-macOS12-Intel.dmg)
+- Fix: with the playback speed changed, the elapsed time no longer runs ahead of the track
+- Change: a different track starts at 100 % speed (the Turntable pitch fader goes back to 0); changing the audio output keeps the speed
+- Fix: leaving full screen with macOS's own controls (Esc, Ctrl+Cmd+F, Exit Full Screen) brings back the title bar, controls and playlist
+- Fix: long titles in the Booth, Modern, Khoshekh and Retro skins end in "…" instead of being cut off
+- Fix: .sha256 files name the file only, so "shasum -c" works in a download folder
+- Change: TrackDeck's skins share one script for their window behaviour and accent colour (about 800 fewer lines); no visible change
+
 * 1.3.2, Sat Nov 7 2026
 - Fix: embedded artwork now shows for AIFF and WAV files (it was never read from them), and for Opus files that store it as a picture block
 - New: the tag editor shows which tags a file has (e.g. "Tags: ID3v2.4 + ID3v1") and, for MP3/AIFF/WAV, which ID3v2 version saving writes

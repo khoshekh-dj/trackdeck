@@ -49,6 +49,8 @@
 #endif
 #include "utils.h"
 #include "volumeSlider.h"
+#include "levelMeter.h"
+#include "platterWidget.h"
 #include "spectrumWidget.h"
 #include "waveformSlider.h"
 
@@ -114,6 +116,14 @@ NPlayer::NPlayer()
 #else
     QString scriptFileName(":skins/native/script.js");
 #endif
+#ifndef _N_NO_SKINS_
+    // shared skin code (window behaviour, accent colours) used by
+    // TrackDeck's skins; runs first so the skin's script can use it
+    QFile commonFile(":skins/common.js");
+    commonFile.open(QIODevice::ReadOnly);
+    m_scriptEngine->evaluate(commonFile.readAll(), commonFile.fileName());
+    commonFile.close();
+#endif
     QFile scriptFile(scriptFileName);
     scriptFile.open(QIODevice::ReadOnly);
     m_scriptEngine->evaluate(scriptFile.readAll(), scriptFileName);
@@ -145,6 +155,8 @@ NPlayer::NPlayer()
     m_waveformSlider = m_mainWindow->findChild<NWaveformSlider *>("waveformSlider");
     m_waveformSlider->setLayout(trackInfoLayout);
     m_spectrumWidget = m_mainWindow->findChild<NSpectrumWidget *>("spectrumWidget"); // optional
+    m_levelMeters = m_mainWindow->findChildren<NLevelMeter *>(); // optional
+    m_platterWidget = m_mainWindow->findChild<NPlatterWidget *>("platterWidget"); // optional
 
 #ifdef Q_OS_WIN
     NW7TaskBar::instance()->setWindow(m_mainWindow);
@@ -244,6 +256,19 @@ void NPlayer::connectSignals()
     if (m_spectrumWidget) {
         connect(m_playbackEngine, SIGNAL(spectrumChanged(const QVector<float> &, int)),
                 m_spectrumWidget, SLOT(setSpectrum(const QVector<float> &, int)));
+    }
+    // level meters need an engine that measures levels (GStreamer does)
+    bool levels = m_playbackEngine->metaObject()->indexOfMethod("setLevelsEnabled(bool)") >= 0;
+    foreach (NLevelMeter *meter, m_levelMeters) {
+        if (levels) {
+            connect(m_playbackEngine,
+                    SIGNAL(levelsChanged(const QVector<float> &, const QVector<float> &)), meter,
+                    SLOT(setLevels(const QVector<float> &, const QVector<float> &)));
+        }
+    }
+    if (levels) {
+        QMetaObject::invokeMethod(m_playbackEngine, "setLevelsEnabled",
+                                  Q_ARG(bool, !m_levelMeters.isEmpty()));
     }
     if (QObject *builder = dynamic_cast<QObject *>(NPluginLoader::getPlugin(N::WaveformBuilder))) {
         connect(builder, SIGNAL(bpmDetected(const QString &, qreal)), this,
@@ -505,6 +530,7 @@ void NPlayer::loadSettings()
     }
 #endif
 
+    m_keyNotation = m_settings->value("KeyNotation").toString();
     m_playbackEngine->setVolume(m_settings->value("Volume").toFloat());
     m_volumeSlider->setValue(m_settings->value("Volume").toFloat());
     applyVisualiserSettings();
@@ -567,6 +593,13 @@ void NPlayer::applySettings()
     m_trackInfoWidget->updateFileLabels(m_playbackEngine->currentMedia());
     m_playlistWidget->setColumnsMode(m_settings->value("PlaylistColumns").toBool());
     m_playlistWidget->processVisibleItems();
+    QString keyNotation = m_settings->value("KeyNotation").toString();
+    if (keyNotation != m_keyNotation) { // keys are shown differently now
+        m_keyNotation = keyNotation;
+        m_playlistWidget->invalidateItemData();
+        m_trackInfoWidget->updateFileLabels(m_playbackEngine->currentMedia());
+        emit trackInfoChanged();
+    }
     m_actionManager->saveSettings();
 }
 
@@ -639,6 +672,14 @@ void NPlayer::quit()
 
 void NPlayer::on_playbackEngine_mediaChanged(const QString &file, int)
 {
+    // a different track starts at 100 % speed, as if the pitch were reset
+    if (!file.isEmpty() && file != m_speedMedia) {
+        if (!m_speedMedia.isEmpty() && m_playbackEngine->speed() != 1.0) {
+            m_playbackEngine->setSpeed(1.0);
+        }
+        m_speedMedia = file;
+    }
+
     QString title;
     QString format = NSettings::instance()->value("WindowTitleTrackInfo").toString();
     if (!format.isEmpty()) {
@@ -718,6 +759,9 @@ void NPlayer::loadCoverArt(const QString &file)
     } else {
         m_coverWidget->show();
         m_coverWidget->setPixmap(QPixmap::fromImage(image));
+    }
+    if (m_platterWidget) { // a skin's turntable shows the cover as the record label
+        m_platterWidget->setPixmap(image.isNull() ? QPixmap() : QPixmap::fromImage(image));
     }
     m_currentCover = image;
     updateAmbientImage();

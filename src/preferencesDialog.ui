@@ -1202,6 +1202,16 @@ padding: 5px;</string>
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="keyNotationLabel">
+              <property name="toolTip">
+               <string>How musical keys are shown: as written in the file, on the Camelot wheel (8A, 8B) or as musical names (Am, C)</string>
+              </property>
+              <property name="text">
+               <string>Key notation:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="tooltipTrackInfoLabel">
               <property name="text">
                <string>Tooltip:</string>
@@ -1235,6 +1245,13 @@ padding: 5px;</string>
              <widget class="QComboBox" name="id3v2VersionComboBox">
               <property name="toolTip">
                <string>The ID3 tag version the Tag Editor writes to MP3, WAV and AIFF files</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="keyNotationComboBox">
+              <property name="toolTip">
+               <string>How musical keys are shown: as written in the file, on the Camelot wheel (8A, 8B) or as musical names (Am, C)</string>
               </property>
              </widget>
             </item>

@@ -242,6 +242,10 @@ void NSpectrumWidget::setColorScheme(bool rgb, const QString &scheme, const QCol
 void NSpectrumWidget::setAppearance(const Appearance &appearance)
 {
     m_appearance = appearance;
+    m_userStyle = appearance.style;
+    if (!m_forcedStyle.isEmpty()) {
+        m_appearance.style = m_forcedStyle;
+    }
     m_timer->setInterval(1000 / qBound(15, appearance.frameRate, 60));
     if (barCount() != m_level.size()) {
         resetBars(barCount());
@@ -250,8 +254,19 @@ void NSpectrumWidget::setAppearance(const Appearance &appearance)
     update();
 }
 
+void NSpectrumWidget::setForcedStyle(const QString &style)
+{
+    m_forcedStyle = style;
+    m_appearance.style = style.isEmpty() ? m_userStyle : style;
+    m_cacheDirty = true;
+    update();
+}
+
 void NSpectrumWidget::setSpectrum(const QVector<float> &magnitudes, int sampleRate)
 {
+    if (!isVisible()) { // switched off, but a level meter keeps the data coming
+        return;
+    }
     int n = barCount();
     if (m_target.size() != n) {
         resetBars(n);

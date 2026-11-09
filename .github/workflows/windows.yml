@@ -111,7 +111,7 @@ jobs:
           fi
           file="TrackDeck-${label}-Windows-x64.zip"
           mv dist/TrackDeck-windows.zip "dist/$file"
-          sha256sum "dist/$file" | tee "dist/$file.sha256"
+          (cd dist && sha256sum "$file" | tee "$file.sha256")
           echo "file=$file" >> "$GITHUB_OUTPUT"
           echo "setup=TrackDeck-${label}-Windows-x64-Setup" >> "$GITHUB_OUTPUT"
           echo "version=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
@@ -151,7 +151,7 @@ jobs:
       - name: Checksum installer
         run: |
           f="${{ steps.name.outputs.setup }}.exe"
-          sha256sum "dist/$f" | tee "dist/$f.sha256"
+          (cd dist && sha256sum "$f" | tee "$f.sha256")
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

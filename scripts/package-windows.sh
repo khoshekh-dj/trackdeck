@@ -23,7 +23,7 @@ GSTLIB="$PREFIX/lib/gstreamer-1.0"
 PLUGINS="coreelements typefindfunctions playback autodetect app audioconvert
  audioresample volume audioparsers id3demux apetag icydemux isomp4 mpg123
  flac ogg vorbis opus opusparse wavparse aiff faad musepack libav
- asf wavpack spectrum wasapi wasapi2 directsound"
+ asf wavpack spectrum level wasapi wasapi2 directsound"
 mkdir -p "$APP/gstreamer"
 for p in $PLUGINS; do
     if [ -f "$GSTLIB/libgst$p.dll" ]; then

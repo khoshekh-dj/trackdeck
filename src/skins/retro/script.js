@@ -12,72 +12,16 @@
 function Main()
 {
     try {
-        Ui.titleWidget.enableDoubleClick();
-        Ui.titleWidget.doubleClicked.connect(Ui.mainWindow.toggleMaximize);
-
-        PlaybackEngine["stateChanged(N::PlaybackState)"].connect(this, "on_stateChanged");
-        PlaybackEngine["mediaChanged(const QString &, int)"].connect(this, "on_mediaChanged");
-        Player["trackInfoChanged()"].connect(this, "updateTrackLabels"); // e.g. BPM detected
-
-        Ui.mainWindow["newTitle(const QString &)"].connect(this, "setTitle");
-        Ui.mainWindow["fullScreenEnabled(bool)"].connect(this, "on_fullScreenEnabled");
-        Ui.mainWindow["showPlaybackControlsEnabled(bool)"].connect(this, "on_showPlaybackControlsEnabled");
-        Ui.mainWindow["maximizeEnabled(bool)"].connect(this, "on_maximizeEnabled");
-        Ui.mainWindow.resized.connect(this, "on_resized");
-
-        if (!Settings.value("RetroSkin/Splitter")) {
-            Settings.setValue("RetroSkin/Splitter", [230, 300]);
-        }
-        if (!Settings.value("RetroSkin/SplitterFullScreen")) {
-            Settings.setValue("RetroSkin/SplitterFullScreen", [999999, 0]);
-        }
-        Ui.splitter["splitterMoved(int, int)"].connect(this, "on_splitterMoved");
-
-        Ui.mainWindow.windowFlags = (Ui.mainWindow.windowFlags | Qt.FramelessWindowHint | Qt.WindowCloseButtonHint) ^ (Qt.WindowTitleHint | Qt.Dialog);
-
-        if (Q_WS == "mac") {
-            Ui.playlistWidget.setAttribute(Qt.WA_MacShowFocusRect, false);
-            Ui.sizeGrip.setParent(Ui.borderWidget);
-        } else {
-            Ui.sizeGrip.hide();
-            Ui.mainWindow.setSizeGripEnabled(true);
-        }
-
-        // window buttons go where the platform expects them
-        if (Q_WS != "mac" && WS_WM_BUTTON_DIRECTION != "left") {
-            Ui.titleWidget.layout().addWidget(Ui.minimizeButton);
-            Ui.titleWidget.layout().addWidget(Ui.closeButton);
-        }
-
-        this.marginsBkp_ = Ui.borderWidget.layout().contentsMargins();
-
-        if (WS_WM_TILING) {
-            Ui.titleWidget.setVisible(false);
-        }
+        SkinCommon.setup(this, {
+            settings: "RetroSkin",
+            splitter: [230, 300]
+        });
     } catch (err) {
         print("QtScript: " + err);
     }
 }
 
-Main.prototype.afterShow = function()
-{
-    Ui.splitter.setSizes(Settings.value("RetroSkin/Splitter"));
-    Ui.menuButton["clicked()"].connect(this, "showMenu");
-    this.updateTrackLabels();
-    this.on_resized();
-}
-
-Main.prototype.showMenu = function()
-{
-    var menuPos = Ui.menuButton.pos;
-    menuPos.y += Ui.menuButton.height;
-    Player.showContextMenu(menuPos);
-}
-
-Main.prototype.on_mediaChanged = function(file, id)
-{
-    this.updateTrackLabels();
-}
+SkinCommon.install(Main);
 
 Main.prototype.updateTrackLabels = function()
 {
@@ -113,64 +57,4 @@ Main.prototype.on_stateChanged = function(state)
         Ui.playButton.styleSheet = "qproperty-icon: url(pause.svg)";
     else
         Ui.playButton.styleSheet = "qproperty-icon: url(play.svg)";
-}
-
-Main.prototype.on_resized = function()
-{
-    if (Q_WS == "mac") {
-        Ui.sizeGrip.move(Ui.sizeGrip.parentWidget().width - Ui.sizeGrip.width - 3,
-                         Ui.sizeGrip.parentWidget().height - Ui.sizeGrip.height - 3);
-        Ui.sizeGrip.raise();
-    }
-}
-
-Main.prototype.on_splitterMoved = function(pos, index)
-{
-    if (Ui.mainWindow.isFullSceen()) {
-        Settings.setValue("RetroSkin/SplitterFullScreen", Ui.splitter.sizes());
-    } else {
-        Settings.setValue("RetroSkin/Splitter", Ui.splitter.sizes());
-    }
-}
-
-Main.prototype.setTitle = function(title)
-{
-    Ui.titleLabel.text = title;
-    Ui.titleLabel.toolTip = title;
-}
-
-Main.prototype.on_fullScreenEnabled = function(enabled)
-{
-    if (enabled) {
-        Ui.splitter.setSizes(Settings.value("RetroSkin/SplitterFullScreen"));
-    } else {
-        Ui.splitter.setSizes(Settings.value("RetroSkin/Splitter"));
-    }
-
-    if (Settings.value("ShowPlaybackControls")) {
-        Ui.controlsContainer.setVisible(!enabled);
-    }
-    Ui.titleWidget.setVisible(!enabled);
-    this.setBorderVisible(!enabled);
-}
-
-Main.prototype.on_showPlaybackControlsEnabled = function(enabled)
-{
-    if (!Ui.mainWindow.isFullSceen()) {
-        Ui.controlsContainer.setVisible(enabled);
-    }
-}
-
-Main.prototype.on_maximizeEnabled = function(enabled)
-{
-    this.setBorderVisible(!enabled);
-}
-
-Main.prototype.setBorderVisible = function(enabled)
-{
-    if (!enabled) {
-        Ui.borderWidget.layout().setContentsMargins(0, 0, 0, 0);
-    } else {
-        Ui.borderWidget.layout().setContentsMargins(this.marginsBkp_);
-    }
 }
