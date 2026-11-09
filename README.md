@@ -17,7 +17,7 @@ A dark design with large cover art, the title, artist and album, a BPM · kbps �
 - **Khoshekh skin:** the same layout in a deep teal and cream palette.
 - **Booth skin:** graphite panels and a black player screen with segment-display BPM and time-remaining readouts, the key, and round backlit buttons. Its accent follows your accent colour.
 - **Mixer skin:** a black chassis with a channel strip with left and right LED level meters and a fader for the volume. The visualiser shows as LED segments and the buttons are rubber pads.
-- **Turntable skin:** a brushed silver deck with the cover art as the record label on a platter with strobe dots, a ±8 % pitch fader that changes the playback speed, and a big start/stop button. BPM and time remaining follow the pitch.
+- **Turntable skin:** a brushed silver deck with the cover art as the record label on a platter with strobe dots, a ±8 % pitch fader that changes the playback speed, and a big start/stop button. BPM and time remaining follow the pitch, and each new track starts back at 0 %.
 - **Retro skin:** bevelled grey panels and a green-on-black display, a tribute to the desktop players of the late '90s.
 
 To switch skins, use Preferences → General → Skin, then restart TrackDeck.
@@ -50,6 +50,8 @@ For tracks without a BPM tag, TrackDeck works out the tempo the first time you p
 
 ### Playlist columns
 The playlist can show columns from your tags: Artist, Title, Album, Genre, Key, Label, BPM, Year, Track, Bitrate and Duration. In Preferences → Track Information, tick the columns you want and drag them into order. Columns are resizable. To turn them off, untick *Show playlist as columns*.
+
+Keys can be shown as they're tagged, in Camelot notation (8A, 8B) or as musical names (Am, C): Preferences → Track Information → *Key notation*. TrackDeck reads Camelot, Open Key (1m) and names such as F# minor, and converts between them. The playlist, the skins and the window title follow the setting.
 
 ![Playlist columns with Genre, BPM, Key and Label, sorted by key](docs/assets/keysort.jpg)
 
